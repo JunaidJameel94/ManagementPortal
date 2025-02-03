@@ -1,0 +1,84 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+
+@{
+	ViewBag.Title = "News View";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section TopCss {
+	@* <link href="~/assets/css/NewsEdit.css" rel="stylesheet" />
+ *@
+}
+
+@{
+	System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+	var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+	var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+	ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+	List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+	var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+	bool _allowinsert = FilterForm.AllowInsert;
+	bool _allowupdate = FilterForm.AllowUpdate;
+	bool _allowdelete = FilterForm.AllowDelete;
+}
+
+<main class="mb-5">
+	@* <input type="hidden" id="newsId" value="@ViewBag.NewsID" />
+ *@
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header">
+						<div class="row">
+							<div class="col-12">
+								<h5><strong>News View</strong> </h5>
+							</div>
+						</div>
+					</div>
+					<div class="card-body">
+						<div class="table-responsive">
+							<table class="table table-hover" id="SingleNewsView">
+								<thead>
+									<tr>
+										<th>Image</th>
+										<th>Title</th>
+										<th>Action</th>
+										<th>Remarks</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+
+
+<!-- Modal -->
+<div class="modal fade" id="CreaterRemarks" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="exampleModalLabel">News Creator Remarks Send To Editor</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<label for="creator-remarks">Enter Remarks:</label>
+				<textarea id="creator-remarks" class="form-control" rows="3" placeholder="Enter your remarks here..."></textarea>
+			</div>
+			<div class="modal-footer">
+				<button id="submit-remarks" class="btn btn-primary">Submit Remarks</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section BottomJS {
+	<script src="~/assets/js/custom-js/NewsViews.js"></script>
+}

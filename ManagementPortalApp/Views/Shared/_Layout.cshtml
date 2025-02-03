@@ -9,7 +9,8 @@
     string authToken = sessionItems.authToken.access_token;
     List<ManagementPortalApp.Models.Authentication.Form> _Form = sessionItems.forms;
     string RequestUrl = Context.Request.RouteValues["controller"].ToString() + "/" + Context.Request.RouteValues["action"].ToString();
-    
+    sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+
     @functions {
         public void RenderDesktopViewNavs(ManagementPortalApp.Models.Authentication.Form form, string requestUrl)
         {
@@ -22,248 +23,220 @@
             string active_2 = form.Childrens.Any(x => x.FormController + "/" + x.FormAction == requestUrl) ? "show" : "";
 
             //Dont Show Forms That Have Zero Childrens
-            if (form.Childrens.Count() > 0)
+            if (form.Childrens.Count() > 0) 
             {
-                
-                <div>
-                    <a class="nav-link parent" data-bs-toggle="collapse" href="#GROUP_@form.FormID" role="button" aria-expanded="false" aria-controls="@form.FormDisplayName">
-                        <i class="bx bxs-cog"></i>
-                        <span class="nav_name">@form.FormDisplayName</span>
-                        <i class='bx @((active_1 == "active") ? "bx-chevron-down" : "bx-chevron-right") toggleClassParent'></i>
+                <li class="nxl-item nxl-hasmenu">
+                    <a class="nxl-link" href="javascript:void(0);">
+                        <span class="nxl-micon"><i class="feather-airplay"></i></span>
+                        <span class="nxl-mtext nav_name">@form.FormDisplayName</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
-                </div>
-
-                <div class="collapse navbar-collapse @active_2" id="GROUP_@form.FormID">
-                    <ul class="navbar-nav">
-                        @foreach (var child in form.Childrens)
+                    <ul class=" nxl-submenu active_1" id="GROUP_@form.FormID">
+                        @foreach (var child in form.Childrens.Where(x=>x.IsNavView))
                         {
                             string active_3 = (requestUrl == child.FormController + "/" + child.FormAction) ? "active" : "";
 
-                            <li class="nav-item">
+                            <li class="nxl-item">
                                 @if (child.Childrens.Any())
                                 {
                                     this.RenderDesktopViewNavs(child, requestUrl);
                                 }
                                 else
                                 {
-                                    <a class="nav-link @active_3" href="../@child.FormController/@child.FormAction">@child.FormDisplayName</a>
+                                    <a class="nxl-link @active_3" href="../@child.FormController/@child.FormAction">@child.FormDisplayName</a>
                                 }
                             </li>
                         }
                     </ul>
-                </div>
+                </li>
             }
-        }
-
-        public void RenderMobileViewNavs(ManagementPortalApp.Models.Authentication.Form form, string requestUrl)
-        {
-            string url = "#";
-            if (form.FormController != "" && form.FormController != null)
-            {
-                url = "../" + form.FormController + "/" + form.FormAction;
-            }
-            string active_1 = form.Childrens.Any(x => x.FormController + "/" + x.FormAction == requestUrl) ? "active" : "collapsed";
-            string active_2 = form.Childrens.Any(x => x.FormController + "/" + x.FormAction == requestUrl) ? "show" : "";
-
-            //Dont Show Forms That Have Zero Childrens
-            if (form.Childrens.Count() > 0)
-            {
-                <div>
-                    <a class="nav-link parentmobile" href="@url">
-                        <i class="bx bxs-cog"></i>
-                        <span class="nav_name">@form.FormDisplayName</span>
-                    </a>
-                    <a class="nav_link dropdown-nav-mobile" data-bs-toggle="collapse" href="#GROUP_@form.FormID" role="button" aria-expanded="false" aria-controls="@form.FormDisplayName">
-                        <i class='bx bx-chevron-down'></i>
-                    </a>
-                </div>
-
-                <div class="collapse navbar-collapse @active_2" id="GROUP_@form.FormID">
-                    <ul class="navbar-nav">
-                        @foreach (var child in form.Childrens)
-                        {
-                            string active_3 = (requestUrl == child.FormController + "/" + child.FormAction) ? "active" : "";
-
-                            <li class="nav-item">
-                                @if (child.Childrens.Any())
-                                {
-                                    this.RenderMobileViewNavs(child, requestUrl);
-                                }
-                                else
-                                {
-                                    <a class="nav-link @active_3" href="../@child.FormController/@child.FormAction">@child.FormDisplayName</a>
-                                }
-                            </li>
-                        }
-                    </ul>
-                </div>
-            }
-        }
+        }   
     }
-
 }
-
 <!DOCTYPE html>
-<html>
+<html lang="zxx">
+
 <head>
     <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="style-src 'self' 'unsafe-inline';">
+    <meta name="description" content="" />
+    <meta name="keyword" content="" /> 
     <title>@ViewBag.Title | Management Portal</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="~/Public/image/favicon.ico">
-    <link href="~/Public/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <link href="~/Public/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" type="text/css" />
-    <link href="~/Public/css/custom-css/Layout/_Layout.css" rel="stylesheet" type="text/css" />
-    <link href="~/Public/css/custom-css/Layout/style.css" rel="stylesheet" type="text/css" />
-    <link href="~/Public/css/custom-css/Layout/responsive.css" rel="stylesheet" type="text/css" />
-    <link href="~/Public/vendor/select2/select2.min.css" rel="stylesheet" type="text/css" />
-    <link href="~/Public/vendor/datatables/css/datatables.min.css" rel="stylesheet" type="text/css" />
-    <link href="~/Public/vendor/sweetalert/sweetalert2.min.css" rel="stylesheet" type="text/css" />
-    <link href="~/Public/vendor/Highcharts-11.0.1/code/css/highcharts.css" />
+    <link rel="stylesheet" type="text/css" href="~/assets/vendors/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/assets/css/vendors.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/assets/vendors/daterangepicker/daterangepicker.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/assets/css/theme.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/assets/css/style.css" />
+    <link href="~/assets/vendors/datatables/dataTables.bs5.min.css" rel="stylesheet" />
+    <link href="~/assets/vendors/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+
+
+
     @RenderSection("TopCss", false)
 </head>
 
-<body id="body-pd">
-    <header class="header" id="header">
-        <div class="header_toggle d-none d-lg-flex">
-            <img src="~/Public/image/logo.png" alt="logo" class="main-logo">
-            <i class='bx bx-toggle-right' id="header-toggle"></i>
-        </div>
-        <nav class="navbar navbar-dark navbar-expand-lg mobile-nav d-block d-lg-none">
-            <a class="navbar-brand" href="~/Admin/Dashboard">
-                <img src="~/Public/image/logo.png" alt="logo" class="mobile-logo">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav">
+<body>
+    <input type="hidden" id="UserID" value="@UserID" />
+    <nav class="nxl-navigation">
+        <div class="navbar-wrapper">
+            <div class="m-header">
+                <a href="#" class="b-brand">
+                    <!-- ========   change your logo hear   ============ -->
+                    <img src="~/assets/images/logo-full.png" alt="" class="logo logo-lg" />
+                    <img src="~/assets/images/logo-abbr.png" alt="" class="logo logo-sm" />
+                </a>
+            </div>
+            <div class="navbar-content">
+                <ul class="nxl-navbar">
+                    <li class="nxl-item nxl-caption">
+                        <label>Menu</label>
+                    </li> 
+
                     @{
                         @if (_Form.Count > 0)
                         {
                             @foreach (var form in _Form)
                             {
-                                <div>
+                                <li class="nxl-item nxl-hasmenu" >
                                     @{
-                                        this.RenderMobileViewNavs(form, RequestUrl);
+                                        this.RenderDesktopViewNavs(form, RequestUrl);
                                     }
-                                </div>
+                                </li>
                             }
                         }
-                    }
-                    <li class="nav-item">
-                        <div class="mobile-profile dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <div class="profile-media">
-                                    <img src="~/Public/image/@(userInfo.UserImage == null ? "profile.png": "UserImage/" + userInfo.UserImage)" alt="profile">
-                                </div>
-                                <div class="media-name">
-                                    <p class="profile-name mb-0">@userInfo.UserName</p>
-                                    <span class="profile-role mb-0">@userInfo.RoleName</span>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="~/Forms/UserProfile">
-                                        <i class='bx bxs-user'></i> Profile
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="~/Forms/ChangePassword">
-                                        <i class='bx bxs-lock-alt'></i> Change Password
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="~/Login/Logout">
-                                        <i class='bx bx-log-out'></i> Signout
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
+                    } 
                 </ul>
-            </div>
-        </nav>
-        <div class="profile-nav mobile-profile d-none d-lg-flex">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                <div class="profile-media">
-                    <img src="~/Public/image/@(userInfo.UserImage == null ? "profile.png": "UserImage/" + userInfo.UserImage)" alt="profile">
-                </div>
-                <div class="media-name">
-                    <p class="profile-name mb-0">@userInfo.UserName</p>
-                    <span class="profile-role mb-0">@userInfo.RoleName</span>
-                </div>
-            </a>
 
-            <ul class="dropdown-menu">
-                <li>
-                    <a class="dropdown-item" href="~/Forms/UserProfile">
-                        <i class='bx bxs-user'></i> Profile
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="~/Forms/ChangePassword">
-                        <i class='bx bxs-lock-alt'></i> Change Password
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="~/Login/Logout">
-                        <i class='bx bx-log-out'></i> Signout
-                    </a>
-                </li>
-            </ul>
+            </div>
         </div>
-    </header>
-    <div class="l-navbar d-none d-lg-block" id="nav-bar">
-        <nav class="nav">
-            <div class="subnav">
-                <div class="nav_list">
-                    <div href="javascript:void(0);" class="menu_name">
-                        <span class="nav_name">Menu</span>
-                        <hr />
+    </nav>
+
+    <header class="nxl-header">
+        <div class="header-wrapper">
+            <!--! [Start] Header Left !-->
+            <div class="header-left d-flex align-items-center gap-4">
+                <!--! [Start] nxl-head-mobile-toggler !-->
+                <a href="#" class="nxl-head-mobile-toggler" id="mobile-collapse">
+                    <div class="hamburger hamburger--arrowturn">
+                        <div class="hamburger-box">
+                            <div class="hamburger-inner"></div>
+                        </div>
+                    </div>
+                </a> 
+                <div class="nxl-navigation-toggle">
+                    <a href="javascript:void(0);" id="menu-mini-button">
+                        <i class="feather-align-left"></i>
+                    </a>
+                    <a href="javascript:void(0);" id="menu-expend-button">
+                        <i class="feather-arrow-right"></i>
+                    </a>
+                </div> 
+                <div class="nxl-lavel-mega-menu-toggle d-flex d-lg-none">
+                    <a href="javascript:void(0);" id="nxl-lavel-mega-menu-open">
+                        <i class="feather-align-left"></i>
+                    </a>
+                </div>
+                <!--! [End] nxl-lavel-mega-menu-toggle !-->
+                <!--! [Start] nxl-lavel-mega-menu !-->
+                <div class="nxl-drp-link nxl-lavel-mega-menu">
+                    <div class="nxl-lavel-mega-menu-toggle d-flex d-lg-none">
+                        <a href="#" id="nxl-lavel-mega-menu-hide">
+                            <i class="feather-arrow-left me-2"></i>
+                            <span>Back</span>
+                        </a>
                     </div>
 
-                    @if (_Form.Count > 0)
-                    {
-                        @foreach (var form in _Form)
-                        {
-                            <div>
-                                @{
-                                    this.RenderDesktopViewNavs(form, RequestUrl);
-                                }
+                </div>
+                <!--! [End] nxl-lavel-mega-menu !-->
+            </div>
+            <!--! [End] Header Left !-->
+            <!--! [Start] Header Right !-->
+            <div class="header-right ms-auto">
+                <div class="d-flex align-items-center">
+
+                    <div class="dropdown nxl-h-item">
+                        <a href="#;" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside"> 
+                            <img src="~/assets/images/@(userInfo.UserImage == null ? "profile.png": "UserImage/" + userInfo.UserImage)" class="img-fluid user-avtar me-0" alt="profile">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-user-dropdown">
+                            <div class="dropdown-header">
+                                <div class="d-flex align-items-center">
+                                    <img src="~/assets/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar" />
+                                    <div class="media-name">
+                                        <p class="profile-name mb-0">@userInfo.UserName</p>
+                                        <span class="profile-role mb-0">@userInfo.RoleName</span>
+                                    </div>
+
+                                </div>
                             </div>
-                        }
-                    }
+
+
+
+                            @* <a class="dropdown-item" href="~/Forms/UserProfile" >
+                                <i class="feather-user"></i>
+                                <span> Profile</span>
+                            </a> *@
+                            <a class="dropdown-item" href="~/Login/ChangePassword">
+                                <i class="feather-lock"></i>
+                                <span>Change Password</span>
+                            </a>
+
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="~/Login/Logout">
+                                <i class="feather-log-out"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </nav>
-    </div>
-
-    <section class="main">
-        <div class="container-fluid main-content">
-            @RenderBody()
+            <!--! [End] Header Right !-->
         </div>
-    </section>
+    </header>
 
-    <script src="~/Public/vendor/jquery/jquery-3.7.1.min.js"></script>
-    <script src="~/Public/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/Public/vendor/jquery/jquery.validate.min.js"></script>
-    <script src="~/Public/vendor/datatables/js/jquery.dataTables.min.js"></script>
-    <script src="~/Public/vendor/datatables/js/dataTables.rowGroup.min.js"></script>
-    <script src="~/Public/vendor/datatables/js/rowGroup.dataTables.js"></script>
-    <script src="~/Public/vendor/datatables/js/datatables.buttons.min.js"></script>
-    <script src="~/Public/vendor/datatables/js/jszip.min.js"></script>
-    <script src="~/Public/vendor/datatables/js/pdfmake.min.js"></script>
-    <script src="~/Public/vendor/datatables/js/vfs_fonts.js"></script>
-    <script src="~/Public/vendor/datatables/js/buttons.html5.min.js"></script>
-    <script src="~/Public/vendor/datatables/js/buttons.print.min.js"></script>
-    <script src="~/Public/vendor/select2/select2.min.js"></script>
-    <script src="~/Public/vendor/SignalR/jquery.signalR-2.4.3.min.js"></script>
-    <script src="~/Public/vendor/sweetalert/sweetalert2.all.min.js"></script>
-    <script src="~/Public/vendor/Highcharts-11.0.1/code/highcharts.js"></script>
-    <script src="~/public/js/classes/APICALL.js"></script>
-    <script src="~/public/js/classes/UTILITY.js"></script>
-    <script src="~/public/js/classes/JSONTOEXCEL.js"></script>
-    <script src="~/public/js/classes/REPORTGENERATOR.js"></script>
+    <main class="nxl-container">
+        <div class="nxl-content">
 
-    <script src="~/Public/js/custom-js/Layout/_Layout.js"></script>
+            <!-- [ Main Content ] start -->
+            <div class="main-content p-1">
+                <div class="container-fluid main-content p-1">
+                    @RenderBody()
+                </div>
+            </div>
+            <!-- [ Main Content ] end -->
+        </div>
+        <!-- [ Footer ] start -->
+        <footer class="footer">
+            @{
+                var dates = DateTime.Now.ToString("yyyy-MM-dd");
+
+            <p class="fs-11 text-muted fw-medium text-uppercase mb-0 copyright">
+                <span>Copyright © @dates</span>
+            </p>
+        }
+        </footer>
+        <!-- [ Footer ] end -->
+    </main>
+
+    <script src="~/assets/vendors/jquery/jquery-3.7.1.min.js"></script>
+    <script src="~/assets/vendors/jquery-validate/jquery.validate.min.js"></script>
+    <script src="~/assets/vendors/daterangepicker/daterangepicker.min.js"></script>
+	<script src="~/assets/vendors/datatables/datatables.min.js"></script>
+	<script src="~/assets/vendors/datatables/datatables.bs5.min.js"></script>
+    <script src="~/assets/vendors/circle-progress/circle-progress.min.js"></script>
+	<script src="~/assets/vendors/bootstrap/bootstrap.min.js"></script>
+	<script src="~/assets/vendors/nxlnavigation/nxlnavigation.min.js"></script>
+	<script src="~/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="~/assets/js/common-init.min.js"></script>
+    <script src="~/assets/js/theme-customizer-init.min.js"></script>
+    <script src="~/assets/vendors/sweetalert/sweetalert2.all.min.js"></script>
+    <script src="~/assets/js/classes/APICALL.js"></script>
+    <script src="~/assets/js/classes/UTILITY.js"></script>
+    <script src="~/assets/js/custom-js/_Layout.js"></script>
+
+
     @RenderSection("BottomJS", false)
-</body>
+ </body>
+
 </html>

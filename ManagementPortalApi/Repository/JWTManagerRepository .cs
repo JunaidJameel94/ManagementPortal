@@ -54,6 +54,46 @@ namespace ManagementPortalApi.Repository
             };
 
         }
+        public Tokens ApiUserAuthenticate(ApiUserDTO users)
+        {
+            ApiUserDTO user = _userDAL.ValidateApiUser(users.UserName, users.UserPassword, iconfiguration);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            // Else we generate JSON Web Token
+            var tokenexpirey = DateTime.UtcNow.AddMinutes(5);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenKey = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("AM_JWT_KEY"));
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Email, user.UserEmail),
+                    new Claim("UserID", user.UserID.ToString()),
+                    new Claim("AccessLevel", user.AccessLevel),
+                    new Claim("ApiDelay", user.ApiDelay)
+                }),
+                Expires = tokenexpirey,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var tokeinitiatedatetime = DateTime.Now;
+            var tokenexpirydatetime = DateTime.Now.AddMinutes(5);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return new Tokens
+            {
+                access_token = tokenHandler.WriteToken(token),
+                token_type = "bearer",
+                expires_in = tokenexpirey.ToString(),
+                start_date_time = tokeinitiatedatetime,
+                end_date_time = tokenexpirydatetime
+            };
+
+        }
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
             var Key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("AM_JWT_KEY"));
@@ -79,5 +119,7 @@ namespace ManagementPortalApi.Repository
 
             return principal;
         }
+
+   
     }
 }

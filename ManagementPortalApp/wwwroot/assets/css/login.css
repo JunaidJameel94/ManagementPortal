@@ -1,0 +1,30 @@
+﻿.auth-cover-content-inner {
+    background-image: url(../images/bulletin-background1.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    color: var(--bs-nav-pills-link-active-color);
+    background-color: var(--bs-nav-pills-link-active-bg) !important;
+}
+
+.auth-cover-wrapper .auth-cover-content-inner {
+    background-image: url('../images/bulletin-background1.jpg');
+    background-position: right;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.auth-minimal-wrapper .auth-minimal-inner {
+    background-image: url('../images/change-ps2.jpg');
+    background-position: right;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.custom-file, .custom-select, .form-control, .form-select, input {
+    border-color: #404249a1;
+    padding: 10px 10px;
+}

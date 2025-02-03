@@ -1,0 +1,460 @@
+﻿ @inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@{
+    // Fetching the user claims
+    System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+    var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+    var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+
+    // Getting the session items
+    ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+
+    // Check if session is null, redirect to login page if it is
+    if (sessionItems == null)
+    {
+        // Redirect to login page if session is null
+        Context.Response.Redirect("/Account/Login");
+        return;
+    }
+
+    // If session is valid, proceed with the rest of the logic
+    List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+    var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+    bool _allowinsert = FilterForm.AllowInsert;
+    bool _allowupdate = FilterForm.AllowUpdate;
+    bool _allowdelete = FilterForm.AllowDelete;
+}
+@{
+    ViewBag.Title = "Feed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- This is where you include your CSS files -->
+@section TopCss {
+    <link href="~/assets/css/responsive.css" rel="stylesheet" />
+}
+
+<div class="card">
+<div class="card-body">
+<div class="feed-page">
+    <div class="row">
+
+        <div class="col-sm-4 col-12 text-end  ms-auto">
+
+            <div class="lastdropdns d-flex justify-content-end">
+                <div class="dropdown my-2">
+                    <a class="nav-link dropdown-toggle btn-primary hidden-arrow " href="#" id="Filters" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-filter"></i> &nbsp; <span><strong>Filters</strong></span> &nbsp;
+                    </a>
+
+                    <div class="dropdown-menu " aria-labelledby="Filters">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-12 col-12 my-auto text-center  borderleft">
+                                <div class="my-auto">
+
+                                    <img src="~/assets/images/logo.png" class="img-fluid" />
+
+                                </div>
+                            </div>
+                            <div class="col-lg-3  col-md-4  col-12 my-2  borderleft">
+                                <h4>CATEGORY</h4>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="FEEDS" id="categoryCheckboxes">
+                                            <!-- Placeholder for dynamic category checkboxes -->
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="col-lg-3 col-md-4  col-12 my-2  borderleft">
+                                <h4>Date</h4>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label for="SelectRange"> Select A Range    </label>
+                                            <input type="date" class="form-control" id="startdate" />
+                                            <input type="date" class="form-control my-2" id="enddate" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-3 col-md-4  col-12 my-2   borderleft">
+                                <h4>Source</h4>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="FEEDS" id="SourceCheckboxes">
+                                            <!-- Placeholder for dynamic category checkboxes -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12   my-2">
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-sm btn-primary " id="searchbtn">Search</button> &nbsp;
+                                    <button class="btn btn-sm btn-light-brand">All Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>  &nbsp;  &nbsp;
+
+                <div class="dropdown my-2">
+                    <a class="nav-link btn-light-brand hidden-arrow" href="@Url.Action("ManageCollection","Feed")" role="button">
+                        <i class="fa fa-newspaper"></i> &nbsp; <span><strong>Save Collection</strong></span> &nbsp;
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 searchbars-divs">
+            <div class="">
+                <div class="row">
+                    <div class="col-lg-2 col-md-4 col-5 m-auto">
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle hidden-arrow " href="#" id="allone" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Searching Type
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="allone">
+                                <li><a class="dropdown-item" href="#">All</a></li>
+                                <li><a class="dropdown-item" href="#">Title</a></li>
+                                <li><a class="dropdown-item" href="#">Link</a></li>
+                                <li><a class="dropdown-item" href="#">Content</a></li>
+                                <li><a class="dropdown-item" href="#">Description</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-10 col-md-8 col-7 searchbtns">
+                        <div class="input-group">
+                            <input class="form-control" type="search" value="" placeholder="Search Keyword"
+                                   id="searchInput">
+                            <span class="input-group-append">
+                                <button class="btn btn-outline-secondary ms-n5" id="searchButton" type="button">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-12 col-12">
+            <div class="filter-links  ">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="All-tab" data-bs-toggle="tab" data-bs-target="#All-tab-pane"
+                                type="button" role="tab" aria-controls="All-tab-pane" aria-selected="true">
+                            All
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="Text-tab" data-bs-toggle="tab" data-bs-target="#Text-tab-pane"
+                                type="button" role="tab" aria-controls="Text-tab-pane" aria-selected="false">
+                            Text
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="Picture-tab" data-bs-toggle="tab" data-bs-target="#Picture-tab-pane"
+                                type="button" role="tab" aria-controls="Picture-tab-pane" aria-selected="false">
+                            Picture
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="tab-content" id="myTabContent">
+
+                <div class="tab-pane fade show active" id="All-tab-pane" role="tabpanel" aria-labelledby="All-tab" tabindex="0">
+                    <div class="news-card">
+                        <div class="row my-2" id="all-tab-container">
+                        </div>
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <div class="ldmor-div text-center">
+                                    <span class="left-dash"> </span>
+                                    <span class="ldmore-btn">
+                                        <button class="btn btn-primary btn-md mx-auto" id="loadmorefeedall">
+                                            <i class="fa fa-angle-down"></i>  &nbsp;
+                                            Load More
+                                        </button>
+                                    </span>
+                                    <span class="right-dash"> </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="Text-tab-pane" role="tabpanel" aria-labelledby="Text-tab" tabindex="0">
+                    <div class="news-card">
+                        <div class="row my-2" id="text-tab-container">
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="ldmor-div ">
+                                    <span class="left-dash"> </span>
+                                    <span class="ldmore-btn"> <button class="btn btn-primary btn-md mx-auto" id="loadmorefeedtext"> <i class="fa fa-angle-down"></i>  &nbsp; Load More </button></span>
+                                    <span class="right-dash"> </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="Picture-tab-pane" role="tabpanel" aria-labelledby="Picture-tab" tabindex="0">
+                    <div class="news-card">
+                        <div class="row  my-2" id="picture-tab-container">
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="ldmor-div ">
+                                    <span class="left-dash"> </span>
+                                    <span class="ldmore-btn"> <button class="btn btn-primary btn-md mx-auto" id="loadmorefeedpicture"> <i class="fa fa-angle-down"></i>  &nbsp; Load More </button></span>
+                                    <span class="right-dash"> </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="Video-tab-pane" role="tabpanel" aria-labelledby="Video-tab" tabindex="0">
+                    <div class="news-card">
+                        <div class="row my-2" id="news-container">
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="ldmor-div ">
+                                    <span class="left-dash"> </span>
+                                    <span class="ldmore-btn"> <button class="btn btn-primary btn-md mx-auto" id="loadmorefeed"> <i class="fa fa-angle-down"></i>  &nbsp; Load More </button></span>
+                                    <span class="right-dash"> </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="Audio-tab-pane" role="tabpanel" aria-labelledby="Audio-tab" tabindex="0">
+                    <div class="news-card">
+                        <div class="row my-2" id="news-container">
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="ldmor-div ">
+                                    <span class="left-dash"> </span>
+                                    <span class="ldmore-btn"> <button class="btn btn-primary btn-md mx-auto" id="loadmorefeed"> <i class="fa fa-angle-down"></i>  &nbsp; Load More </button></span>
+                                    <span class="right-dash"> </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- Modal pic-->
+<div class="modal news-modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+     tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <div class="row w-100">
+                    <div class="col-md-8 col-12">
+                        <h4 class="mb-0">News Details</h4>
+                    </div>
+                    <div class="col-md-4 col-12 text-end">
+                        <div class="d-flex justify-content-end w-100">
+                            <span class="close-btn">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="modal-body">
+
+                <div class="loading">
+                    <svg class="pl" width="240" height="240" viewBox="0 0 240 240">
+                        <circle class="pl__ring pl__ring--a" cx="120" cy="120" r="105" fill="none" stroke="#000" stroke-width="20"
+                                stroke-dasharray="0 660" stroke-dashoffset="-330" stroke-linecap="round"></circle>
+                        <circle class="pl__ring pl__ring--b" cx="120" cy="120" r="35" fill="none" stroke="#000" stroke-width="20"
+                                stroke-dasharray="0 220" stroke-dashoffset="-110" stroke-linecap="round"></circle>
+                        <circle class="pl__ring pl__ring--c" cx="85" cy="120" r="70" fill="none" stroke="#000" stroke-width="20"
+                                stroke-dasharray="0 440" stroke-linecap="round"></circle>
+                        <circle class="pl__ring pl__ring--d" cx="155" cy="120" r="70" fill="none" stroke="#000" stroke-width="20"
+                                stroke-dasharray="0 440" stroke-linecap="round"></circle>
+                    </svg>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 rightborder">
+                        <div class="row">
+                            <div class="col-md-4 col-12">
+                                <div class="news-title-links">
+                                    <ul>
+                                        <li class="" id="modalcategory"></li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-12 ">
+                                <div class="date-tpe">
+                                    <p class="mb-0"> <strong id="modaldate"> </strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div id="newstitle">
+                                    <h3></h3>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="info-div">
+                                    <div class="row">
+                                        <div class="col-md-1 my-auto">
+                                            <i class="fas fa-info-circle fa-2x"></i>
+                                        </div>
+                                        <div class="col-md-11" id="newdescription">
+                                            <p>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row scrolable">
+
+                            <div class="col-12 my-2">
+                                <div class="full-imgbox text-center" id="feedimage">
+                                    <img src="" class="img-fluid" alt="">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="new-windodiv">
+                                    <div class="row">
+                                        <div class="col-md-11" id="newcontent">
+                                            <p class="newcontentstyle">
+
+                                            </p>
+                                        </div>
+                                        <div class="col-md-1 mb-auto">
+                                            <a href="" target="_blank">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-4 modalright-site">
+                        <div class="row">
+                            <div class="col-12 my-2 text-center Add-collection">
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-bookmark"></i> &nbsp; Add to collection
+                                    </button>
+                                    <ul class="dropdown-menu" id="displaycollection">
+                                        <!-- Dynamic content will be appended here -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row  ">
+                            <div class="col-12">
+                                <h3>
+                                    DETAILS
+                                </h3>
+                            </div>
+                            <hr />
+
+
+                            <div class="col-md-6 col-12 Source-divs">
+                                <span> <strong>Source: </strong></span>
+                                <span class="Source"><a href="" id="modalsource"> </a> </span>
+                            </div>
+                            <div class="col-md-6 col-12 dates-div text-right">
+                                <span> <strong> Date:</strong></span>
+                                <span class="datetime" id="PublicationDate"></span>
+                            </div>
+                          
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<!-- Modal pic END-->
+
+
+<div class="modal news-modal fade" id="smodalon" data-bs-backdrop="smodalons" data-bs-keyboard="false"
+     tabindex="-1" aria-labelledby="smodalonLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <div class="row w-100">
+                    <div class="col-md-7 col-12 text-end"><h4>Create New Collection</h4></div>
+                    <div class="col-md-5  col-12 text-end">
+                        <div class="d-flex justify-content-end w-100">
+
+                            <span class="close-btn">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" id="modalhide">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form action="" method="post" id="FormCollectionName">
+                            <label>Create New Collection</label>
+                            <input class="form-control" type="text" id="Collection_name" name="Collection_name" placeholder="Enter new collection" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="row w-100">
+                    <div class="col-md-12 col-12 text-center">
+                        <button class="btn btn-sm  btn-primary" id="btnSavecollection">Create </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section BottomJS {
+    <script src="~/assets/js/custom-js/Feed.js"></script>
+}

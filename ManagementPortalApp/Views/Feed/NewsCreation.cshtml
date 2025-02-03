@@ -1,0 +1,428 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@{
+    ViewBag.Title = "Template Creation";
+    Layout = "~/Views/Shared/_FeedLayout.cshtml";
+}
+@section TopCss {
+    <link href="~/assets/css/NewsCreation.css" rel="stylesheet" />
+
+}
+@{
+    System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+    var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+    var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+    ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+    List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+    var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+    bool _allowinsert = FilterForm.AllowInsert;
+    bool _allowupdate = FilterForm.AllowUpdate;
+    bool _allowdelete = FilterForm.AllowDelete;
+}
+
+
+<main class="mb-5">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 pe-1">
+                <div class="card">
+                    <div class="card-header headingtop">
+                        <div class="row mb-0">
+                            <div class="col-8 text-center mt-auto mb-0 newsheading">
+                                <h3 class="mb-0"> <strong>Create News</strong><small class="optiontext">( Fill the form below to add new news )</small> </h3>
+                            </div>
+                            <div class="col-4 text-center mt-auto mb-0">
+                                <button id="generate-news-ai" class="btn btn-dark">Generate AI News</button>
+                                <button class="btn btn-dark" id="btnshowliveperview">Select Templates</button>
+                                <button class="btn btn-dark" id="btnviewallnewsedited">View All News</button>
+                            </div>
+                          
+                        </div>
+                    </div>
+             
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-8">
+
+                                <div id="selectedTemplateContainer">
+                                    <!-- Loader Spinner (Initially hidden) -->
+                                    
+                                </div>
+                                
+                                <hr />
+                                <div class="container">
+                                    <div class="row">
+                                        <div id="inputForm">
+                                            <h3>Select Chart Type and Enter Data</h3>
+
+                                            <label for="">Select Chart Type:</label>
+                                            <select id="chartType" class="form-control">
+                                                <option hidden="true">Select Chart</option>
+                                                <option value="bar">Bar Chart</option>
+                                                <option value="pie">Pie Chart</option>
+                                                <option value="line">Line Chart</option>
+                                                <option value="radar">Radar Chart</option>
+                                                <option value="doughnut">Doughnut Chart</option>
+                                                <option value="bubble">Bubble Chart</option>
+                                                <option value="scatter">Scatter Plot</option>
+                                            </select>
+                                            <div id="dynamicInputs">
+                                                <!-- Dynamic input fields based on chart selection will be inserted here -->
+                                                <label>Enter Data Values (Comma-Separated)</label>
+                                                <input type="text" id="userValues" class="form-control" placeholder="e.g., 10, 20, 30, 40, 50" />
+
+                                                <label>Enter Series Name (Comma-Separated)</label>
+                                                <input type="text" id="userSeriesValue" class="form-control" placeholder="e.g., Series 1 , Series 2 , Series 3" />
+                                            
+                                                <label>Enter Chart Name</label>
+                                                <input type="text" id="userchartname" class="form-control" placeholder="e.g., Example 1" />
+                                            </div>
+
+                                            <button id="btngeneratedchart" class="btn btn-dark  mt-2">Generate Charts</button>
+                                        </div>
+                               
+                                        
+                                        <!-- Language Section -->
+                                        <div class="col-md-4 mb-3">
+                                            <div class="form-group">
+                                                <label for="Language" class="fw-bold">Language:<span class="text-danger"> *</span></label>
+                                                <select class="form-control" id="Language" name="Language">
+                                                    <option selected>Choose...</option>
+                                                    <option value="English">English</option>
+                                                    <option value="Spanish">Spanish</option>
+                                                    <option value="French">French</option>
+                                                    <option value="German">German</option>
+                                                    <option value="Italian">Italian</option>
+                                                    <option value="Chinese">Chinese</option>
+                                                    <option value="Japanese">Japanese</option>
+                                                    <option value="Korean">Korean</option>
+                                                    <option value="Portuguese">Portuguese</option>
+                                                    <option value="Russian">Russian</option>
+                                                    <option value="Turkish">Turkish</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Meta Keywords Section -->
+                                        <div class="col-md-4 mb-3">
+                                            <div class="form-group">
+                                                <label for="Metakeyword" class="fw-bold">Meta Keywords:</label>
+                                                <input id="MetaKeyword-input" class="w-100 form-control" name="MetaKeyword" placeholder="Add MetaKeyword" />
+                                               
+                                            </div>
+                                        </div>
+
+                                        <!-- Meta Description Section -->
+                                        <div class="col-md-4 mb-3">
+                                            <div class="form-group">
+                                                <label for="Metadescription" class="fw-bold">Meta Description</label>
+                                                <textarea class="form-control" id="Metadescription" name="Metadescription" rows="1"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <!-- Featured Checkbox Section -->
+                                        <div class="col-md-4 mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="Features" name="Features" class="form-check-input">
+                                                <label for="Features" class="form-check-label">Featured &nbsp; <small><i class="fa fa-question-circle"></i></small></label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Popular Checkbox Section -->
+                                        <div class="col-md-4 mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="Popular" name="Popular" class="form-check-input">
+                                                <label for="Popular" class="form-check-label">Popular &nbsp; <small><i class="fa fa-question-circle"></i></small></label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Allow Comments Checkbox Section -->
+                                        <div class="col-md-4 mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="Allowcomment" name="Allowcomment" class="form-check-input">
+                                                <label for="Allowcomment" class="form-check-label">All Comments &nbsp; <small><i class="fa fa-question-circle"></i></small></label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Category Management Section -->
+                                        <div class="col-md-12">
+                                            <div id="Categories" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                                                <div class="accordion-body">
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-3">
+                                                            <div class="form-group">
+                                                                <label for="CategoryName" class="fw-bold">Add Category</label>
+                                                                <div class="input-group">
+                                                                    <input type="text" class="form-control" id="CategoryName" name="CategoryName" aria-describedby="categoryHelp">
+                                                                    <button id="saveCategoryBtn" type="button" class="btn btn-dark btn-sm">Save</button>
+                                                                </div>
+                                                            </div>
+                                                            <label for="category" class="fw-bold">Select Category</label>
+                                                            <ul id="categoryList" class="list-unstyled">
+                                                                <!-- Categories will be dynamically added here -->
+                                                            </ul>
+                                                        </div>     
+                                                        
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="Thumbnailimage" class="fw-bold">Thumbnail image</label>
+                                                            <div class="file-upload">
+                                                                <div class="image-upload-wrap">
+                                                                    @* <input class="file-upload-input" type='file' id="file-upload-input" name="Thumbnail" accept="image/*" />
+                                                                     *@
+                                                                    <div class="drag-text">
+                                                                        <img src="~/assets/images/add-photo.png" id="thumnaildisplay" alt="Click to upload" onclick="$('#file-upload-input').trigger('click')">
+                                                                    </div>
+                                                                </div>
+                                                          @*       <div class="file-upload-content my-2">
+                                                                    <img class="file-upload-image" src="#" alt="your image" />
+                                                                    <div class="image-title-wrap">
+                                                                        <button type="button" class="btn btn-sm btn-secondary remove-image">
+                                                                            <i class="fa fa-trash"></i> &nbsp; Remove
+                                                                        </button>
+                                                                    </div>
+                                                                </div> *@
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tags Section -->
+                                        <div class="col-md-12">
+                                            <label for="Tags" class="fw-bold">Tags:<span class="text-danger"> *</span></label>
+                                            <p>To add a tag, type a word (or words) and press "Tab", "comma (,)", or "Enter"</p>
+                                            <input type="text" id="TagName" name="TagName" class="form-control" placeholder="Enter tags">
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <div class="col-4">
+                                <input type="hidden" id="newsid" />
+                                <input type="hidden" id="templateid" />
+                                <div class="card-body">
+                                    <div class="news-details my-auto text-center">
+                                        <h4 class="mb-0"><i class="fa fa-globe"></i> My Collection</h4>
+                                    </div>
+                                    <div class="news-tools">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="collspe-div">
+                                                    <div class="accordion" id="accordionPanelsStayOpenExample">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="row">
+                                            @if(_allowinsert==true)
+                                            {
+                                                <div class="col-4">
+                                                    <label>Save News</label>
+                                                    <button type="button" id="btnsavenews" class="btn btn-dark">Save News</button>
+                                                </div>
+                                            }
+                                            <div class="col-5">
+                                                <label>Upload Excel File</label>
+                                                <input type="file" class="btn btn-dark" id="excelInput" value="Excel Upload On Table" accept=".xls,.xlsx" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+   
+    <!-- Modal Start -->
+
+    <div class="modal fade" id="livePreviewModal" tabindex="-1" aria-labelledby="livePreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="livePreviewModalLabel">Live Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Your live preview content here -->
+                    <p>Live preview content goes here...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="DisplaySelectedTemplate" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h4 class="modal-title">Live Perview Design</h4>
+                    <div class="d-flex align-items-center ms-auto">
+                        <input type="text" id="templateSearchInput" class="form-control me-2" placeholder="Search Template">
+                        <button type="button" class="btn btn-dark me-2" id="btn_searchTemplate">Search</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <!-- Display All Saved Templates With Column 6 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="DisplayTemplateDetails" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h4 class="modal-title"> Select Template Design </h4>
+                    <div class="d-flex"></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!--Display All Save Tempalete With The Column 6-->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btn_selectliveperviewtemplatenewscreation" class="btn btn-dark" data-bs-dismiss="modal">Select Template</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="DisplayAllEditedNEws" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h4 class="modal-title">News</h4>
+                    <div class="d-flex align-items-center ms-auto">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <table id="newsTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Image</th>
+                                <th class="w-50">Title</th>
+                                <th>Actions</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be appended here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div class="modal fade" id="NewsCreatorRemarks" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Remarks</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="creator-remarks">Enter Remarks:</label>
+                    <textarea id="creator-remarks" class="form-control" rows="3" placeholder="Enter your remarks here..."></textarea>
+                    <button id="submit-remarks" class="btn btn-success mt-2">Submit Remarks</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal HTML -->
+    <div class="modal fade" id="DisplayNewsContent" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h5 class="modal-title" id="exampleModalLabel">News Collection Content</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <!-- Content editable area for entering news content -->
+                    
+
+                    <!-- Paste button -->
+                    
+                </div>
+                <div class="modal-footer">
+                    <button id="pasteButton" class="btn btn-primary mt-2">Paste</button>
+                    <button type="button" class="btn btn-secondary" id="contentclosebtn" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="DisplayImageCollection" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h5 class="modal-title" id="exampleModalLabel">News Collection Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalImage">
+                    <!-- Content will be injected here -->
+                </div>
+                <div id="resolutionOptions">
+                    <h4>Select Image Resolution</h4>
+                    <div>
+                        <input type="radio" name="resolution" value="800x600" checked> 800x600
+                    </div>
+                    <div>
+                        <input type="radio" name="resolution" value="1024x768"> 1024x768
+                    </div>
+                    <div>
+                        <input type="radio" name="resolution" value="1280x720"> 1280x720
+                    </div>
+                    <div>
+                        <input type="radio" name="resolution" value="1920x1080"> 1920x1080
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" id="btnselectchooseimage" class="btn btn-dark" data-bs-dismiss="modal">Select Image</button>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <!-- Modal for AI-generated News -->
+    <div class="modal fade" id="aiNewsModal" tabindex="-1" role="dialog" aria-labelledby="aiNewsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h5 class="modal-title" id="aiNewsModalLabel">AI Generated News</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="generated-news-content" class="summernote"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="paste-news-btn">Paste</button>
+                    <button type="button" class="btn btn-danger" id="clear-news-btn">Clear</button> <!-- Clear Button -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal END -->
+   
+</main>
+@section BottomJS {
+    <script src="~/assets/js/CustomeJS/NewsCreation.js"></script>
+}

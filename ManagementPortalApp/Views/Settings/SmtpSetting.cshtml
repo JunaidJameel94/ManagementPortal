@@ -5,7 +5,7 @@
 }
 
 @section TopCss{
-    <link href="~/Public/css/custom-css/Settings/SmtpSetting.css" rel="stylesheet" />
+    <link href="~/assets/css/custom-css/Settings/SmtpSetting.css" rel="stylesheet" />
 }
 @{
 
@@ -33,23 +33,26 @@
                     <div class="row">
                         <div class="col-12" id="">
                             <div class="row">
-                                <div class="col-12 col-sm-12 col-md-12 col-lg-3">
+                                <div class="col-12 col-sm-12 col-md-12 col-lg-4">
                                     <label>Smtp</label>
                                     <input type="text" class="form-control" id="Smtp" name="Smtp" autocomplete="off" required>
                                 </div>
                                
-                                <div class="col-12 col-sm-12 col-md-12 col-lg-3 mt-3 mt-lg-0">
+                                <div class="col-12 col-sm-12 col-md-12 col-lg-4 mt-3 mt-lg-0">
                                     <label>Sender Email </label>
                                     <input type="email" class="form-control" id="SenderEmailID" name="SenderEmailID" autocomplete="off" required>
                                 </div>
                                 
-                                <div class="col-12 col-sm-12 col-md-12 col-lg-3 mt-3 mt-lg-0">
+                                <div class="col-12 col-sm-12 col-md-12 col-lg-4 mt-3 mt-lg-0">
                                     <label>User Password</label>
-                                    <div>
-                                        <span id="Smtptogglepassword" class="px-0 input-group-text d-inline-block togglepassword">
-                                            <i class="bx bx-show"></i>
-                                        </span>
+                                    <div class="d-flex">
+                                       
                                         <input type="password" class="form-control password" id="SmtpPassword" name="SmtpPassword" minlength="8" autocomplete="off" required>
+@*                                         <span id="Smtptogglepassword" class="px-0 py-1 input-group-text d-inline-block togglepassword"> *@
+                                        <span id="Smtptogglepassword" class=" input-group-text togglepassword">
+                                            <i class="feather feather-eye"></i>
+                                        </span>
+                                    
                                     </div>
                                 </div>
 
@@ -57,18 +60,19 @@
                         </div>
 
                     </div>
-                    <div class="row">
-                        <div class="col-12 col-sm-12 col-md-12 col-lg-3 mt-3">
+                    <div class="row my-3">
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-4">
                             <label>Port</label>
                             <input type="text" class="form-control" id="SmtpPort" name="SmtpPort" autocomplete="off" required>
                         </div>
-                        <div class="col-12 col-sm-12 col-md-12 col-lg-3 mt-3">
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-4">
                             <label>Display Name</label>
                             <input type="text" class="form-control" id="DisplayName" name="DisplayName" autocomplete="off" required>
                         </div>
-                        <div class="col-12 col-sm-12 col-md-12 col-lg-3 mt-3 mt-lg-auto">
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-4 mt-auto">
+                          
+                            <input type="checkbox" id="EnableSSL" name="EnableSSL"> &nbsp;
                             <label>Enable SSL</label>
-                            <input type="checkbox" id="EnableSSL" name="EnableSSL">
                         </div>
                     </div>
                 </form>
@@ -76,7 +80,7 @@
                         <div class="col-12">
                         @if (_allowupdate)
                         {
-                            <button class="btn btn-primary btn-block btn-orange  d-block ms-auto updatebutton" id="UpdateBtn" type="button"><i class='bx bxs-save pe-2'></i>Update</button>
+                            <button class="btn btn-primary btn-block btn-sm  d-block ms-auto updatebutton" id="UpdateBtn" type="button"><i class='feather-refresh-cw pe-2'></i>Update</button>
                         }
 
                         </div>
@@ -87,5 +91,5 @@
 </div>
 
 @section BottomJS{
-    <script src="~/Public/js/custom-js/Settings/SmtpSetting.js"></script>
+    <script src="~/assets/js/custom-js/SmtpSetting.js"></script>
 }

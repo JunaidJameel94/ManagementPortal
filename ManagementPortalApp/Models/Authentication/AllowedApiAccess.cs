@@ -28,9 +28,7 @@ namespace ManagementPortalApp.Models.Authentication
             SessionItems sessionItems = _sessions.GetSession(UniqueKey, UserID);
             List<RolesMapping> rolesMapping = sessionItems.rolesMapping;
 
-           
-
-            var _apimaster = rolesMapping.SelectMany(x => x.ApiMaster).Where(y => y.ApiAction == RouteValues).Where(z => z.IsAllowed).FirstOrDefault();
+            APIMaster? _apimaster = rolesMapping.Where(x => x.ApiMaster != null).SelectMany(x => x.ApiMaster).Where(y => y.ApiAction == RouteValues && y.IsAllowed).FirstOrDefault();
 
             if (_apimaster != null) {
 

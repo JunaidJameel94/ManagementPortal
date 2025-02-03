@@ -1,11 +1,14 @@
 using ManagementPortalApi.Extensions;
 using ManagementPortalApi.Logging;
+using ManagementPortalApi.Models;
 using ManagementPortalApi.Models.Authentication;
 using ManagementPortalApi.Repository;
 using ManagementPortalApi.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +25,13 @@ builder.Services.AddSingleton<UserDAL>();
 builder.Services.AddSingleton<ManagementPortalApi.Context.DataAccessLayer>();
 builder.Services.AddSingleton<SendEmail>();
 builder.Services.AddSingleton<DataEncryptor>();
+builder.Services.AddSingleton<RssFeedService>();
+builder.Services.AddHostedService<RssFeedService>();
+builder.Services.AddSingleton<FTPRssFeedService>();
+builder.Services.AddHostedService<FTPRssFeedService>();
+builder.Services.AddSingleton<NewsAI>();
+
+
 builder.Services.AddSingleton<RandomStringGenerator>();
 
 builder.Host.ConfigureLogging((context, logging) =>
@@ -122,5 +132,4 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
 });
 
-//ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
 app.Run();

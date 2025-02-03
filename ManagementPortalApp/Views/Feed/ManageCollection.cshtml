@@ -1,0 +1,121 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@* @{
+    ViewBag.Title = "Collection Manage";
+    Layout = "~/Views/Shared/_FeedLayout.cshtml";
+} *@
+@{
+    ViewBag.Title = "Collection Manage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section TopCss {
+
+
+}
+@{
+    System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+    var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+    var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+    ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+    List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+    var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+    bool _allowinsert = FilterForm.AllowInsert;
+    bool _allowupdate = FilterForm.AllowUpdate;
+    bool _allowdelete = FilterForm.AllowDelete;
+}
+
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-block p-2">
+                <div class="row">
+                    <div class="col-md-7 col-12 my-auto">
+                        <h4 class="mb-0">Collections</h4>
+                    </div>
+                    <div class="col-md-5 col-12 my-auto text-end">
+                        <div class="">
+                            <button class="btn btn-primary btn-md ms-auto"
+                                    data-bs-toggle="modal" id="CreateNewCollectionmodal">
+                                <i class="feather-plus"></i> &nbsp; New Collections
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 col-12 my-auto">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-bordered" id="CollectionsTbl">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Collections</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="">
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!--modal-->
+<div class="modal news-modal fade" id="smodalon" data-bs-backdrop="smodalons" data-bs-keyboard="false"
+     tabindex="-1" aria-labelledby="smodalonLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <div class="row w-100">
+                    <div class="col-md-7 col-12"><h4 class="mb-0">Create New Collection</h4></div>
+                    <div class="col-md-5  col-12 text-end">
+                        <div class="my-auto">
+
+                            <span class="close-btn">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form action="/" method="post">
+                            <label>Create New Collection</label>
+                            <input class="form-control" type="text" id="Collection_name" name="Collection_name" placeholder="Enter new collection" />
+
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <div class="row w-100">
+                    <div class="col-md-12 col-12 text-center">
+                        <button class="btn btn-md btn-primary mx-auto" id="btnSavecollection">Create </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section BottomJS {
+    <script src="~/assets/js/custom-js/managecollection.js"></script>
+}

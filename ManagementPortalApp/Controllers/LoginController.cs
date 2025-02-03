@@ -358,7 +358,7 @@ namespace ManagementPortalApp.Controllers
 
                                         await HttpContext.SignInAsync("ASPXAUTH", claimPrinciple, authenticationProperty);
                                         bool IsSession = _sessions.AddSession(userInfos[0], rolesMappings, token, encrypteduniquekey, _Form, _sessions.UserPolicies.AllowConcurrentLogin);
-
+                                        //debug
                                         if (IsSession)
                                         {
                                             userInfos[0].SessionID = encrypteduniquekey;

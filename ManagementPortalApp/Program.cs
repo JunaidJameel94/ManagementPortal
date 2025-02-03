@@ -5,6 +5,7 @@ using ManagementPortalApp.Utility;
 using ManagementPortalApp.Extensions;
 using ManagementPortalApp.Models.Authentication;
 using ManagementPortalApp.Models.Session;
+using ManagementPortalApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,12 @@ builder.Services.AddSingleton<SendEmail>();
 builder.Services.AddSingleton<DataEncryptor>();
 builder.Services.AddSingleton<CommonMethods>();
 builder.Services.AddSingleton<RandomStringGenerator>();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 builder.Services.AddAuthentication("ASPXAUTH").AddCookie("ASPXAUTH", config =>
 {
@@ -41,9 +48,8 @@ builder.Host.ConfigureLogging((context, logging) =>
         context.Configuration.GetSection("Logging").GetSection("FileLoggerProvider").Bind(options);
     });
 });
+
 #pragma warning restore ASP0011 // Suggest using builder.Logging over Host.ConfigureLogging or WebHost.ConfigureLogging
-
-
 
 var app = builder.Build();
 
@@ -60,9 +66,9 @@ app.UseMiddleware<SecurityHeadersMiddleware>();
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
-
 app.UseStaticFiles();
+
+app.UseAuthentication();
 
 app.UseRouting();
 
@@ -100,7 +106,6 @@ app.Use(async (context, next) =>
         try
         {
             string[] _path = context.Request.Path.ToString().Split("/");
-
             context.Response.Headers.Append("Content-Disposition", new StringValues("attachment; " + _path[_path.Length - 1]));
         }
         catch
@@ -108,7 +113,6 @@ app.Use(async (context, next) =>
             context.Response.Headers.Append("Content-Disposition", new StringValues("attachment;"));
         }
     }
-
     await next();
 });
 
@@ -116,9 +120,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=UserLogin}/{id?}"
 );
-
-
 //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
-
 app.Run();
-

@@ -45,7 +45,7 @@ namespace ManagementPortalApp.Models.FileUpload
         //}
         public string[] GetAllowedFileExtensions()
         {
-            string[] arrycontent_ = new string[] { ".csv" };
+            string[] arrycontent_ = new string[] { ".csv",".png",".jpeg",".jpg"};
             return arrycontent_;
         }
 

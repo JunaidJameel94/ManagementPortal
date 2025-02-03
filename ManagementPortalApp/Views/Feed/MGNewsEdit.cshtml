@@ -1,0 +1,186 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@* @{
+    ViewBag.Title = "MG News Edit";
+    Layout = "~/Views/Shared/_FeedLayout.cshtml";
+} *@
+@{
+    ViewBag.Title = "MG News Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section TopCss {
+   
+    <link href="~/assets/css/NewsCreation.css" rel="stylesheet" />
+}
+@{
+    System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+    var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+    var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+    ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+    List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+    var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+    bool _allowinsert = FilterForm.AllowInsert;
+    bool _allowupdate = FilterForm.AllowUpdate;
+    bool _allowdelete = FilterForm.AllowDelete;
+}
+
+<main class="mb-5">
+    <input type="hidden" id="newsId" value="@ViewBag.NewsID" />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 pe-1">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3>Edit News</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="container">
+                                    <div class="row">
+                                        <div id="inputForm">
+                                            <div id="showtemplate"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <input type="hidden" id="newsid" />
+                                <input type="hidden" id="templateid" />
+                                <div class="card-body">
+                                    <div class="news-details my-auto text-center">
+                                        <h4 class="mb-0"><i class="fa fa-globe"></i> My Collection</h4>
+                                    </div>
+                                    <div class="news-tools">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="collspe-div">
+                                                    <div class="accordion" id="accordionPanelsStayOpenExample">
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="row">
+                                            @if (_allowupdate == true)
+                                            {
+                                                <div class="col-4">
+                                                    <label>Update News</label>
+                                                    <button type="button" class="btn btn-md btn-dark" id="btnupdatenews">Update</button>
+                                                </div>
+
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!--Modal-->
+
+    <div class="modal fade" id="DisplayNewsContent" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h5 class="modal-title" id="exampleModalLabel">News Collection Content</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <!-- Content will be injected here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="contentclosebtn" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="DisplayImageCollection" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h5 class="modal-title" id="exampleModalLabel">News Collection Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalImage">
+                    <!-- Content will be injected here -->
+                </div>
+                <div id="resolutionOptions">
+                    <h4>Select Image Resolution</h4>
+                    <div>
+                        <input type="radio" name="resolution" value="800x600" checked> 800x600
+                    </div>
+                    <div>
+                        <input type="radio" name="resolution" value="1024x768"> 1024x768
+                    </div>
+                    <div>
+                        <input type="radio" name="resolution" value="1280x720"> 1280x720
+                    </div>
+                    <div>
+                        <input type="radio" name="resolution" value="1920x1080"> 1920x1080
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" id="btnselectchooseimage" class="btn btn-dark" data-bs-dismiss="modal">Select Image</button>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="DisplaySelectedTemplate" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Select Template Design</h4>
+                    <div class="d-flex align-items-center ms-auto">
+                        <input type="text" id="templateSearchInput" class="form-control me-2" placeholder="Search Template">
+                        <button type="button" class="btn btn-dark me-2" id="btn_searchTemplate">Search</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <!-- Display All Saved Templates With Column 6 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="DisplayTemplateDetails" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="msgalert"> </h5>
+                    <div class="d-flex"></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!--Display All Save Tempalete With The Column 6-->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btn_SaveSelectedLivePerviewDesign" class="btn btn-dark " data-bs-dismiss="modal">Save</button>
+                    <button type="button" id="btn_UpdateSelectedLivePerviewDesign" class="btn btn-success " data-bs-dismiss="modal">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--Modal End-->
+</main>
+
+
+@section BottomJS {
+    <script src="~/assets/js/custom-js/MGNewsEdit.js"></script>
+}

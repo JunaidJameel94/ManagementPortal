@@ -1,0 +1,205 @@
+﻿.card {
+    margin-bottom: 0px !important;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all .3s ease;
+    box-shadow: 0 1px 3px 0 #00000091, 0 1px 2px -1px rgba(0, 0, 0, .1) !important;
+}
+
+.nxl-header, .navbar-wrapper .navbar-content {
+    box-shadow: 0 1px 3px 0 #00000091, 0 1px 2px -1px rgba(0, 0, 0, .1) !important;
+}
+
+.nxl-header {
+    min-height: 55px;
+    left: 250px;
+}
+
+.nxl-header .header-wrapper .header-right .dropdown.nxl-h-item {
+    min-height: 50px;
+}
+
+.nxl-navigation .m-header {
+    height: 55px;
+    box-shadow: 0 1px 3px 0 #00000091, 0 1px 2px -1px rgba(0, 0, 0, .1) !important;
+}
+
+.nxl-container {
+    top: 60px;
+    margin-left: 250px;
+}
+
+.nxl-navigation {
+    width: 250px;
+}
+
+.nxl-navigation .navbar-content {
+    height: calc(100vh - 55px);
+}
+
+.footer {
+    box-shadow: 0 1px 3px 0 #00000091, 0 1px 2px -1px rgba(0, 0, 0, .1) !important;
+}
+
+.custom-file, .custom-select, .form-control, .form-select, input {
+    border-color: #404249a1;
+    padding: 10px 10px;
+}
+
+#menu-expend-button{
+    display:none;
+}
+
+/*--------------- Feed styles */
+
+.news-card .card-body {
+    padding: 5px !important;
+}
+
+.packege-links ul {
+    margin-bottom: 0px !important;
+    list-style: none !important;
+    padding-left: 4px;
+}
+
+.news-card .card-footer {
+    padding: 5px !important;
+}
+
+.news-card .card-text {
+    height: 15vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin-top: auto;
+    align-content: center;
+    text-align: center;
+}
+
+.news-card .card {
+    margin-bottom: 10px !important;
+}
+
+    .news-card .card .card-body {
+        height: 25vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+.news-title-links ul {
+    margin-left: 0px;
+    padding-left: 0px;
+    list-style: none;
+}
+
+    .news-title-links ul li {
+        padding: 5px 10px;
+        border: 1px solid transparent;
+        box-shadow: 0px 0px 4px 0px var(--mg-shahdow-color) inset;
+        /*        background-color: var(--lightbg);*/
+        background-color: #64748b;
+        color:white;
+    }
+.date-tpe {
+    padding: 5px 10px;
+    border: 1px solid transparent;
+    box-shadow: 0px 0px 4px 0px var(--mg-shahdow-color) inset;
+    /*        background-color: var(--lightbg);*/
+    background-color: #64748b;
+    color: white;
+}
+ 
+
+#displaycollection li {
+    background-color: var(--lightbg);
+}
+.newcontentstyle{
+    color:black;
+}
+
+#displaycollection {
+    padding: 5px !important;
+}
+
+.Add-collection .dropdown .dropdown-menu .dropdown-item {
+    margin: 5px 0px;
+    padding: 10px 4px;
+    color: #283c50;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    transition: all .3s ease;
+    width: -webkit-fill-available;
+}
+
+.rightborder {
+    border-right: 1px solid var(--lightbg);
+}
+
+.lastdropdns .nav-link {
+    padding: 6px;
+}
+
+.lastdropdns .dropdown-menu.show {
+    z-index: 2000;
+}
+
+.feed-page .lastdropdns > .dropdown > .dropdown-menu {
+    width: 90vw;
+    transform: translate(-621px, 32px) !important;
+}
+
+.scrolable {
+    max-height: 51vh;
+    overflow: auto;
+    box-shadow: 0px 3px 8px 1px #c8bebe82 inset;
+    margin: 5px;
+}
+
+.Add-collection .dropdown-menu {
+    width: 100% !important;
+}
+
+
+
+/*planing start here*/
+.planing-page .news-subtile h6 {
+    margin-left: 30px !important;
+}
+
+.planing-page .news-maintile h5 {
+    margin-left: 30px !important;
+}
+
+.planing-page .news-discrbion p {
+    margin-left: 30px !important;
+}
+
+.planing-page .planing-page .newsdate strong {
+    margin-left: 30px !important;
+}
+
+.planing-page .headerbgcolor {
+    background-color: #e8932d;
+    color: white;
+}
+
+.planing-page .btn-dark {
+    background-color: #202020 !important;
+    border-color: #e8932d !important;
+}
+
+.planing-page .badge {
+    background-color: #e8932d !important;
+}
+
+.planing-page #btn_saveplanning {
+    background-color: #e8932d !important;
+    border-color: #e8932d;
+}
+
+.planing-page .downldCSV .dropdown {
+    position: fixed;
+    display: contents;
+}

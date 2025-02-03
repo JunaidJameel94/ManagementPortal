@@ -1,51 +1,80 @@
 {
-  "profiles": {
-    "http": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5249"
+    "profiles": {
+        "http": {
+            "commandName": "Project",
+            "launchBrowser": true,
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "dotnetRunMessages": true,
+            "applicationUrl": "http://localhost:5249"
+        },
+        "https": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "AM_SALT_SIZE": "32",
+                "AM_KEY_SIZE": "64",
+                "AM_ITERATIONS": "15000",
+                "AM_ENCRYPTION_KEY": "M@Kv2$PBn!992!2-2024",
+                "AM_CHAR_SET": "ThI$I$R@nD0MKeYGeNeR@T0RbY$@L@R",
+                "AM_FOLDERPATH": "C:\\ManagementPortalLogs",
+                "AM_CONNECT_SRC": "https://localhost:7163 wss://localhost:7163/signalr",
+                "AM_SERVICE_URL": "https://localhost:7163/api/",
+                "AM_TARGET_API": "https://localhost:7163",
+                //"AM_DATABASE": "Data Source=.;Initial Catalog=TeryLeneDatabase;Persist Security Info=True;User id=sa;Password=Pakistan1234;",
+
+                "AM_DATABASE": "Data Source=.;Initial Catalog=MG_News;Persist Security Info=True;User id=sa;Password=Pakistan1234;",
+                "AM_JWT_KEY": "$M!G-SF12345%,dns1.namingserver1.com",
+                "AM_JWT_ISSUER": "https://contabo.net/",
+                "AM_JWT_AUDIENCE": "contabo.net",
+                "AM_VIEWURL": "https://localhost:7201",
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "IMAGE_STORAGE_PATH": "F:\\Faizan Work\\2024-10-19 Last Update News Project\\shuja\\Management Portal\\ManagementPortalApp\\wwwroot\\images",
+                "IMAGE_SAVE_RESULTION": "F:\\Faizan Work\\2024-10-19 Last Update News Project\\shuja\\Management Portal\\ManagementPortalApp\\wwwroot\\UserSaveImage",
+                "RssAPPImage": "F:\\Faizan Work\\2024-10-19 Last Update News Project\\shuja\\Management Portal\\ManagementPortalApp\\wwwroot\\images",
+
+           
+
+
+                //News MLG2 Envoirement 
+                "sender": "Mettis Global News",
+                "origin": "Mettis Global News Plat form",
+                "NewsMLG2Namespace": "http://www.iptc.org/std/nar/2006-10-01/",
+                "NewsMLG2Version": "2.0",
+
+                //News MLG1 Envoirement
+                "NewsMLG1Namespace": "http://www.newsml.org/2003/08/newsml",
+                "NewsMLG1Version": "1.0",
+                "NewsMLG1NewsEnvelope": "NewsEnvelope",
+
+                //Atom News Envoirement
+                "NewsAtomNamespace": "http://www.w3.org/2005/Atom",
+                "NewsAtomVersion": "1.0",
+                "NewsAtomNewsEnvelope": "NewsEnvelope",
+                "RSS2MettisLink": "https://mettisglobal.news/",
+                "MettisRSSDescription": "Latest news updates from Mettis Global News"
+            },
+            "launchBrowser": true,
+            "dotnetRunMessages": true,
+            "applicationUrl": "https://localhost:7201;http://localhost:5249"
+        },
+        "IIS Express": {
+            "commandName": "IISExpress",
+            "launchBrowser": true,
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        }
     },
-    "https": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "AM_SALT_SIZE": "32",
-        "AM_KEY_SIZE": "64",
-        "AM_ITERATIONS": "15000",
-        "AM_ENCRYPTION_KEY": "M@Kv2$PBn!992!2-2024",
-        "AM_CHAR_SET": "ThI$I$R@nD0MKeYGeNeR@T0RbY$@L@R",
-        "AM_FOLDERPATH": "C:\\ManagementPortalLogs",
-        "AM_CONNECT_SRC": "https://localhost:7163 wss://localhost:7163/signalr",
-        "AM_SERVICE_URL": "https://localhost:7163/api/",
-        "AM_TARGET_API": "https://localhost:7163",
-        "AM_DATABASE": "Data Source=.;Initial Catalog=MPDatabase;Persist Security Info=True;User id=sa;Password=Pakistan1234;",
-        "AM_JWT_KEY": "$M!G-SF12345%,dns1.namingserver1.com",
-        "AM_JWT_ISSUER": "https://contabo.net/",
-        "AM_JWT_AUDIENCE": "contabo.net",
-        "AM_VIEWURL": "https://localhost:7201",
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7201;http://localhost:5249"
-    },
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+    "$schema": "http://json.schemastore.org/launchsettings.json",
+    "iisSettings": {
+        "windowsAuthentication": false,
+        "anonymousAuthentication": true,
+        "iisExpress": {
+            "applicationUrl": "http://localhost:45809",
+            "sslPort": 44315
+        }
     }
-  },
-  "$schema": "http://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:45809",
-      "sslPort": 44315
-    }
-  }
 }
+
+//172.16.0.149

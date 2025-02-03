@@ -1,0 +1,487 @@
+﻿@using Microsoft.AspNetCore.Http;  <!-- Add this directive -->
+@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@{
+    ViewBag.Title = "Template Creation";
+    Layout = "~/Views/Shared/_FeedLayout.cshtml";
+    var generatedCssFilePath = Context.Session.GetString("GeneratedCssFilePath");
+
+}
+@section TopCss {
+
+    <link href="~/assets/css/TempleteCreation.css" rel="stylesheet" />
+
+    @if (!string.IsNullOrEmpty(generatedCssFilePath))
+    {
+        <link href="@Url.Content(generatedCssFilePath)" rel="stylesheet" />
+    }
+}
+
+@{
+    System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+    var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+    var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+    ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+    List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+    var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+    bool _allowinsert = FilterForm.AllowInsert;
+    bool _allowupdate = FilterForm.AllowUpdate;
+    bool _allowdelete = FilterForm.AllowDelete;
+}
+
+<main class="mb-5">
+    <div class="container-fluid head-div">
+        <div class="row w-100">
+            <div class="col-lg-6 my-auto">
+                <h3 class="text-light">Template Creation <span id="displaymessgae"></span></h3>
+            </div>
+            <div class="col-lg-6 text-end my-auto">
+                <button id="btnselecttemplate" class="btn btngray btn-sm"> <i class="fa fa-check"></i> &nbsp; Select Template Design</button>
+                @if(_allowinsert ==true)
+                {
+                    <button id="btnsavetemplate" class="btn btngray btn-sm"><i class="fa fa-save"></i> &nbsp; Save Template</button>
+                }
+                <button id="btnUpdatetemplate" class="btn btngray btn-sm"><i class="fa fa-save"></i> &nbsp; Update Template</button>
+                
+                <button class="btn btn-sm btngray open-call" id="btnshown"><i class="fa fa-eye"></i> &nbsp; Show Sidebar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid vh-100">
+        <div class="sortable-container p-5 mb-2 position-relative bg-gradient-light">
+            <!-- Rows and columns will be added dynamically here -->
+        </div>
+    </div>
+
+    <div class="sidebartemplate wrap" id="dynamic-divs">
+        <div class="draggable-item" data-columns="col-2">Drag 16.7% CONTENT</div>
+        <div class="draggable-item" data-columns="col-4">Drag 33.3% CONTENT</div>
+        <div class="draggable-item" data-columns="col-6">Drag 50.0% CONTENT</div>
+        <div class="draggable-item" data-columns="col-8">Drag 66.7% CONTENT</div>
+        <div class="draggable-item" data-columns="col-10">Drag 83.3% CONTENT</div>
+        <div class="draggable-item" data-columns="col-12">Drag 100% CONTENT</div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="dimensions-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h4 class="modal-title">Set Dimensions</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label for="modal-height">Defined Area Height (%):</label>
+                        <input type="number" class="form-control" value="100" id="modal-height" placeholder="Defined Area Height (%)">
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input"  id="modal-Title-checkbox">
+                        <label for="modal-Title-checkbox" class="form-check-label">Title</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="modal-image-checkbox">
+                        <label for="modal-image-checkbox" class="form-check-label">Image URL</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="modal-text-checkbox">
+                        <label for="modal-text-checkbox" class="form-check-label">Text</label>
+                    </div>
+                    <div class="form-check mb-2" id="graph-option">
+                        <input type="checkbox" class="form-check-input" id="modal-Graph-checkbox">
+                        <label for="modal-Graph-checkbox" class="form-check-label">Graphs</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="modal-table-checkbox">
+                        <label for="modal-table-checkbox" class="form-check-label">Table</label>
+                    </div>
+
+
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="modal-link-checkbox">
+                        <label for="modal-link-checkbox" class="form-check-label">Link</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="modal-Thumbnail-checkbox">
+                        <label for="modal-Thumbnail-checkbox" class="form-check-label">Thumbnail Image</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="modal-Category-checkbox">
+                        <label for="modal-Category-checkbox" class="form-check-label">Category</label>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="modal-service-checkbox" class="form-check-label">Service:</label>
+                        <select class="form-control" id="ServiceDD" name="ServiceDD"></select>
+                    </div>
+             
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnallow">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+    
+    
+    <div class="modal fade" id="DisplaySelectedTemplate" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header headerbgcolor">
+                    <h4 class="modal-title">Select Template Design</h4>
+                    <div class="d-flex align-items-center ms-auto">
+                        <input type="text" id="templateSearchInput" class="form-control me-2" placeholder="Search Template">
+                        <button type="button" class="btn btn-dark" id="btn_searchTemplate">Search</button>
+                        <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Dynamic template items will be inserted here via JS -->
+                        <div class="col-md-4">
+                            <div class="template-item">
+                                <div class="content">Entertainment News</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="DisplayTemplateDetails" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h4 class="modal-title"> Select Template Design </h4>
+                    <div class="d-flex"></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!--Display All Save Tempalete With The Column 6-->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnSelectTemplateforedit">Select Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="TemplateNamemodal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h4 class="modal-title"> First You Have To Enter Template Name </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="modal-templateName">Enter Template Name:</label>
+                        <input type="text" class="form-control" id="modal-templateName" placeholder="Enter Template Name">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="saveTemplateButton">Save Template</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="DisplayTitleStylingOption" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h4 class="modal-title">Styling Options</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Styling options in a table -->
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr id="Div_fontcolorfamily">
+                                    <td class="divfontcolor">Font Color</td>
+                                    <td class="divfontcolor"><input type="color" id="title-font-color" class="form-control"></td>
+
+                                    <td class="divfontfamily">Font Family</td>
+                                    <td class="divfontfamily">
+                                        <select id="title-font-family" class="form-control">
+                                            <option value="Arial">Arial</option>
+                                            <option value="Verdana">Verdana</option>
+                                            <option value="Times New Roman">Times New Roman</option>
+                                            <option value="Georgia">Georgia</option>
+                                            <option value="Courier New">Courier New</option>
+                                            <!-- Add more font families as needed -->
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr id="Div_fontWeightfontsize">
+                                    <td class="divfontweight">Font Weight</td>
+                                    <td class="divfontweight">
+                                        <select id="title-font-weight" class="form-control">
+                                            <option value="normal">Normal</option>
+                                            <option value="bold">Bold</option>
+                                            <option value="bolder">Bolder</option>
+                                        </select>
+                                    </td>
+
+                                    <td class="divfontsize">Font Size</tdc>
+                                    <td class="divfontsize"><input type="number" id="title-font-size" class="form-control" placeholder="Font Size (px)" min="1"></td>
+                                </tr>
+
+                                <tr id="Div_fontStyleLatterSpacing">
+                                    <td class="divfontstyle">Font Style</td>
+                                    <td class="divfontstyle">
+                                        <select id="title-font-style" class="form-control">
+                                            <option value="normal">Normal</option>
+                                            <option value="italic">Italic</option>
+                                            <option value="oblique">Oblique</option>
+                                        </select>
+                                    </td>
+
+                                    <td class="divfontspacing">Latter Spacing</td>
+                                    <td class="divfontspacing"><input type="number" id="title-letter-spacing" class="form-control" placeholder="Letter Spacing (px)" min="0"></td>
+                                </tr>
+
+                                <tr id="Div_textalightextDecoration">
+                                    <td class="divtextaligmnet">Text Align</td>
+                                    <td class="divtextaligmnet">
+                                        <select id="title-text-align" class="form-control">
+                                            <option value="left">Left</option>
+                                            <option value="center">Center</option>
+                                            <option value="right">Right</option>
+                                            <option value="justify">Justify</option>
+                                        </select>
+                                    </td>
+
+                                    <td class="divtextdecoration">Text Decoration</td>
+                                    <td class="divtextdecoration">
+                                        <select id="title-text-decoration" class="form-control">
+                                            <option value="none">None</option>
+                                            <option value="underline">Underline</option>
+                                            <option value="overline">Overline</option>
+                                            <option value="line-through">Line-through</option>
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr id="Div_TextTransformBackgroundColor">
+                                    <td class="divboxshadow">Box Shadow</td>
+                                    <td class="divboxshadow"><input type="text" id="title-box-shadow" class="form-control" placeholder="e.g., 2px 2px 5px #000"></td>
+
+                                    <td class="divbackgroundcolor">Background Color</td>
+                                    <td class="divbackgroundcolor"><input type="color" id="title-background-color" class="form-control"></td>
+                                </tr>
+
+                                <tr id="Div_BoxShadowPadding">
+
+                                    <td class="divmargin">Margin</td>
+                                    <td class="divmargin"><input type="text" id="title-margin" class="form-control" placeholder="e.g., 5px"></td>
+                                    <td class="divpadding">Padding</td>
+                                    <td class="divpadding"><input type="text" id="title-padding" class="form-control" placeholder="e.g., 10px"></td>
+                                </tr>
+
+                                <tr id="Div_margin">
+                                    <td class="divtexttransform">Text Transform</td>
+                                    <td class="divtexttransform">
+                                        <select id="title-text-transform" class="form-control">
+                                            <option value="none">None</option>
+                                            <option value="capitalize">Capitalize</option>
+                                            <option value="uppercase">Uppercase</option>
+                                            <option value="lowercase">Lowercase</option>
+                                        </select>
+                                    </td>
+
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="title-preview">
+                        Style is Display on DropBox
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" id="apply-title-styling">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--Graph Modal-->
+    <div class="modal fade" id="graphModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h5 class="modal-grapghs" id="graphModalLabel">Graphs Styling</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-6">
+                                <label>Graph Background Color</label>
+                                <input type="color" id="graphbgColor" class="form-control mt-2 mt-10" />
+                                
+                                <label>Select Graph Series</label>
+                                <div class="d-flex align-items-center">
+                                    <input type="text" id="pieColors" class="form-control mt-2" placeholder="#ff0000,#00ff00,#0000ff" />
+
+                                    <!-- Info Icon -->
+                                    <span class="info-icon" data-tooltip="Enter background colors for the graph series. Each color you enter will create a new graph series with that background. Separate each color using a comma. For example: #ff0000,#00ff00,#0000ff will create three graph series with red, green, and blue backgrounds, respectively.">
+                                        &#9432;
+                                    </span>
+                                </div>
+
+                                <input type="color" id="pieColorPicker" class="form-control mt-2" />
+                                @* <button class="btn btn-success mt-2 btcolor" id="addPieColor">Add Color</button> *@
+                            </div>
+                            <!-- Pie Chart with Textbox and Color Picker -->
+                            <div class="col-md-6">
+                                <div class="grpgbox">
+                                    <canvas id="Chartseries" width="400" height="400"></canvas>
+                                </div>
+                            </div>
+         
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" id="create-Graphs">Create Graphs</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Table Customization Modal -->
+    <div class="modal fade" id="table-modal" tabindex="-1" aria-labelledby="tableModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h5 class="modal-title" id="tableModalLabel">Customize Table</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="table-rows">Number of Col:</label>
+                                @* <input type="number" class="form-control" id="table-rows" placeholder="Enter number of rows">*@
+                                <input type="number" id="headerCols" min="1" class="form-control">
+
+                                <label for="table-columns">Number of Rows:</label>
+                                @* <input type="number" class="form-control" id="table-columns" placeholder="Enter number of columns"> *@
+                                <input type="number" id="tablerows" min="1" class="form-control">
+
+                                <button id="createTable" class="btn btn-primary mt-2 btn-sm "><i class="fa fa-plus" aria-hidden="true"></i></button>
+
+
+                                <div id="column-names-container">
+                                    <!-- Column names inputs will be generated here -->
+                                </div>
+                                <h6>Table Styling Options:</h6>
+                                <table class="table table-border">
+                                    <tr>
+                                        <td><label for="column-font-color">Col Font Color:</label></td>
+                                        <td><input type="color" class="form-control colorwidth" id="column-font-color" value="#000000"></td>
+
+                                        <td><label for="row-font-color">Row Font Color:</label></td>
+                                        <td><input type="color" class="form-control colorwidth" id="row-font-color" value="#000000"></td>
+
+                                        <td><label for="column-bg-color">Col Bg Color:</label></td>
+                                        <td> <input type="color" class="form-control colorwidth" id="column-bg-color" value="#ffffff"></td>
+
+                                    </tr>
+
+                                    <tr>
+                                        <td><label for="row-bg-color">Row Bg Color:</label></td>
+                                        <td> <input type="color" class="form-control colorwidth" id="row-bg-color" value="#ffffff"></td>
+
+                                        <td><label for="text-align">Text Align:</label></td>
+                                        <td>
+                                            <select class="form-control colorwidth" id="text-align">
+                                                <option value="left">Left</option>
+                                                <option value="center">Center</option>
+                                                <option value="right">Right</option>
+                                            </select>
+                                        </td>
+
+                                        <td><label for="border-color">Border Color:</label></td>
+                                        <td> <input type="color" class="form-control colorwidth" id="border-color"></td>
+
+                                    </tr>
+
+                                    <tr>
+                                        <td> <label for="border-width">Border Width:</label></td>
+                                        <td><input type="number" class="form-control" id="border-width" value="1" placeholder="Border width in px"></td>
+
+                                        <td><label for="bg-color">Bg Color:</label></td>
+                                        <td> <input type="color" class="form-control colorwidth" value="#ffffff" id="table-bg-color"></td>
+
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            @*          <div id="table-preview">
+                            <!-- The table will be previewed here -->
+                            </div> *@
+
+                            <table id="dynamicTable" class="table">
+                                <thead id="tableHeader"></thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="create-table">Create Table</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Colspan/Rowspan Modal -->
+    <div class="modal fade" id="colspanRowspanModal" tabindex="-1" aria-labelledby="colspanRowspanModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header headerbgcolor">
+                    <h5 class="modal-title" id="colspanRowspanModalLabel">Set Colspan, Rowspan, and Column Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="modal-colspan" class="form-label">Colspan:</label>
+                        @* <input type="number" class="form-control" id="modal-colspan" min="1" value="1"> *@
+                        <input type="number" id="modal-colspan" min="1" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="modal-rowspan" class="form-label">Rowspan:</label>
+                        @*  <input type="number" class="form-control" id="modal-rowspan" min="1" value="1"> *@
+                        <input type="number" id="modal-rowspan" min="1" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="modal-colname" class="form-label">Column Name:</label>
+                        <input type="text" class="form-control" id="modal-colname" placeholder="Enter column name">
+                    </div>
+                    <input type="hidden" id="modal-col-index">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="applyChanges" class="btn btn-primary">Apply Changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</main>
+@section BottomJS {
+    <script src="~/assets/js/CustomeJS/TempleteCreation.js"></script>
+}

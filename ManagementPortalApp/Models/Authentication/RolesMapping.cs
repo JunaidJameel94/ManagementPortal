@@ -13,7 +13,9 @@
         public bool AllowInsert { get; set; }
         public bool AllowUpdate { get; set; }
         public bool AllowDelete { get; set; }
+        public bool IsNavView { get; set; }
         public string JSONData { get; set; }
+        public string? ParentFormID { get; set; }
         public List<APIMaster> ApiMaster { get; set; }
 
     }

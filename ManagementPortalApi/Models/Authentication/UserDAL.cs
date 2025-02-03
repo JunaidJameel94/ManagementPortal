@@ -54,5 +54,58 @@ namespace ManagementPortalApi.Models.Authentication
                 }
             }
         }
+
+        public ApiUserDTO ValidateApiUser(string pUsername, string pPassword, IConfiguration config)
+        {
+            ApiUserDTO apiUser = new ApiUserDTO();
+
+            using (SqlConnection connection = new SqlConnection(Environment.GetEnvironmentVariable("AM_DATABASE")))//DataEncryptor.DecryptPassword(Environment.GetEnvironmentVariable("AM_AUTHENTICATION")))
+            {
+                using (SqlCommand sqlCommand = new SqlCommand("sp_selectapiuser_dal", connection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@UserName", pUsername);
+                    sqlCommand.Parameters.AddWithValue("@UserPassword", pPassword == "NULL" ? "NULL" : pPassword);
+                    if (connection.State == ConnectionState.Closed)
+                    {
+                        connection.Open();
+                    }
+                    using (SqlDataReader dataReader = sqlCommand.ExecuteReader())
+                    {
+                        using (DataTable dataTable = new DataTable())
+                        {
+                            dataTable.Load(dataReader);
+
+                            bool containsusername = dataTable.AsEnumerable().Any(row => pUsername.ToLower() == row.Field<string>("UserName").ToLower());
+
+                            if (dataTable.Rows.Count == 1 && containsusername == true)
+                            {
+
+                                bool active = (bool)dataTable.Rows[0]["IsActive"];
+
+                                if (active)
+                                {
+                                    apiUser.UserID = dataTable.Rows[0]["userid"].ToString();
+                                    apiUser.UserName = dataTable.Rows[0]["username"].ToString();
+                                    apiUser.UserEmail = dataTable.Rows[0]["useremail"].ToString();
+                                    apiUser.AccessLevel = dataTable.Rows[0]["accesslevel"].ToString(); //modulename
+                                    apiUser.ApiDelay = dataTable.Rows[0]["apidelay"].ToString();
+                                    return apiUser;
+                                }
+                                else
+                                {
+                                    return null;
+                                }
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

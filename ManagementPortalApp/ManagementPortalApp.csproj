@@ -1,40 +1,50 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>ae5afb69-c779-4378-b6c5-36f36af8140f</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="wwwroot\Public\js\CustomJs\**" />
-    <Content Remove="wwwroot\Public\js\CustomJs\**" />
-    <EmbeddedResource Remove="wwwroot\Public\js\CustomJs\**" />
-    <None Remove="wwwroot\Public\js\CustomJs\**" />
+    <Compile Remove="wwwroot\assets\js\NewFolder\**" />
+    <Compile Remove="wwwroot\LocalnewsImage\**" />
+    <Compile Remove="wwwroot\Public\**" />
+    <Content Remove="wwwroot\assets\js\NewFolder\**" />
+    <Content Remove="wwwroot\LocalnewsImage\**" />
+    <Content Remove="wwwroot\Public\**" />
+    <EmbeddedResource Remove="wwwroot\assets\js\NewFolder\**" />
+    <EmbeddedResource Remove="wwwroot\LocalnewsImage\**" />
+    <EmbeddedResource Remove="wwwroot\Public\**" />
+    <None Remove="wwwroot\assets\js\NewFolder\**" />
+    <None Remove="wwwroot\LocalnewsImage\**" />
+    <None Remove="wwwroot\Public\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\Public\js\classes\GLOBALURL.js" />
+    <None Remove="Views\us-election-harris-rattles-trump-in-fiery-debate-as-both-push-for-mantle-of-change800x600.jpg_800x600.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.3" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
     <PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
+    <PackageReference Include="WebSharper.JsPDF" Version="4.7.2.203" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\Public\js\Classes\APICALL.js" />
-    <None Include="wwwroot\Public\js\Classes\JSONTOEXCEL.js" />
-    <None Include="wwwroot\Public\js\Classes\REPORTGENERATOR.js" />
-    <None Include="wwwroot\Public\js\Classes\SIGNALR.js" />
-    <None Include="wwwroot\Public\js\Classes\UTILITY.js" />
-    <None Include="wwwroot\Public\vendor\sweetalert\sweetalert2.all.min.js" />
+    <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\UserSaveImage\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Public\uploadfiles\" />
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

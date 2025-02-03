@@ -1,0 +1,467 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@{
+	ViewBag.Title = "Edit Multiple News";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section TopCss {
+	<link href="~/assets/css/form1-style.css" rel="stylesheet" />
+	<link href="~/assets/vendors/summernote/summernote-lite.min.css" rel="stylesheet" />
+	<link href="~/assets/vendors/select2/select2-theme.min.css" rel="stylesheet" />
+	<link href="~/assets/vendors/select2/select2.min.css" rel="stylesheet" />
+}
+@{
+	System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+	var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+	var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+	ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+	List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+	var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+	bool _allowinsert = FilterForm.AllowInsert;
+	bool _allowupdate = FilterForm.AllowUpdate;
+	bool _allowdelete = FilterForm.AllowDelete;
+}
+
+<div class="creations-multi">
+	<input type="hidden" id="newsid" value="@ViewBag.NewsID" />
+	<div class="row">
+		<div class="col-lg-8 col-12">
+
+			<div class="left-side">
+
+				<div class="row">
+			@* 		<input type="hidden" id="newsid" /> *@
+					<!-- Add Title one start -->
+					<div class="col-12">
+						<div class="form-group">
+							<label for="titleone" class="add-title">Add Title 1</label>
+							<input type="text" class="form-control data" id="titleone" formid="1" placeholder="Enter title one" required>
+						</div>
+					</div>
+					<!-- Add Title one end -->
+					<!-- Add Title two start -->
+					<div class="col-12 my-3">
+						<div class="form-group">
+							<label for="titleTwo" class="add-title">Add Title 2</label>
+							<input type="text" class="form-control data" id="titleTwo" formid="1" placeholder="Enter title Two" required>
+						</div>
+					</div>
+					<!-- Add Title two end -->
+					<!-- Add Title two start -->
+					<div class="col-12">
+						<div class="form-group">
+							<label for="titleThree" class="add-title">Add Title 3</label>
+							<input type="text" class="form-control data" id="titleThree" formid="1" placeholder="Enter title Three" required>
+						</div>
+					</div>
+					<!-- Add Title two end -->
+					<!-- Add Description start -->
+					<div class="col-12 my-3">
+						<div class="form-group">
+							<label for="adddescription" class="add-title">Add Description</label>
+							<textarea type="text" class="form-control data" id="addDescription" formid="2" required placeholder="Enter a short description summary"></textarea>
+						</div>
+					</div>
+					<!-- Add Description ends -->
+					<!-- Drop file start here -->
+					<div class="col-12">
+
+						<div class="dropzone text-center mx-auto" id="dropzone">
+							<span class="dropzone__prompt">
+								<img src="~/assets/images/uploadMulti.png" class="img-fluid w-25"> <br>
+								Upload or drag and drop multiple images/videos <br>
+							</span>
+							<input type="file" id="fileInput" multiple accept="image/*,video/*">
+						</div>
+
+						<div class="dropimgdiv mt-1">
+							<div class="uplods-img" id="uploadContainer">
+								<!-- Uploaded previews will be appended here -->
+							</div>
+							<div class="leftright-imgbtns" id="navigationButtons">
+								<button class="btn rounded-circle btn-main-circle" id="leftButton">
+									<i class="feather-arrow-left fs-5 m-auto"></i>
+								</button>
+								<button class="btn rounded-circle btn-main-circle" id="rightButton">
+									<i class="feather-arrow-right fs-5 m-auto"></i>
+								</button>
+							</div>
+						</div>
+
+					</div>
+					<div class="col-12">
+						<div class="form-group ">
+							<label for="addTextImageGenerate" class="add-title">Text To Image Generator</label>
+							<div class="input-group mt-2">
+								<input type="text" class="form-control mt-0" id="textPrompt" placeholder="Enter Text To Image Generate">
+								<button class="btn btn-outline-secondary" type="button" id="btngeneratetexttoimage">Generate Image</button>
+							</div>
+						</div>
+					</div>
+					<!-- Drop file ends-->
+					<!-- Add Content  start-->
+					<div class="col-12 my-3">
+						<div class="form-group">
+							<label for="addContent" class="add-title">Add Content</label>
+							<textarea id="summernote" class="form-control data" name="editordata" formid="3" placeholder="Add Content"></textarea>
+						</div>
+					</div>
+					<!-- Add Content  ends-->
+					<!-- Create AI News start -->
+					<div class="col-12">
+						<div class="form-group">
+							<label for="addAiNews" class="add-title mb-1">Create AI News</label>
+							<div class="ainews-input  my-auto">
+								<textarea type="text" rows="1" class="tex-input my-auto" id="addAiNews" placeholder="What can i help you?" required> </textarea>
+								&nbsp;    &nbsp;
+								<div class="action-btns  my-auto">
+									<button class="btn rounded-circle btn-white-circle btn-sm sm-auto">
+										<i class="feather-paperclip fs-5 m-auto"></i>
+									</button>
+									&nbsp;   &nbsp;
+									<button id="generate-news-ai" type="button" class="btn rounded-circle btn-main-circle">
+										<i class="feather-send m-auto"></i>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- Create AI News ends -->
+					<!-- Add Graph/Add Table start -->
+					<div class="col-12 my-3">
+						<ul class="nav nav-tabs nav-tabs-custom-style" id="myTab" role="tablist">
+							<li class="nav-item" role="presentation">
+								<button class="nav-link active" data-bs-toggle="tab" data-bs-target="#AddGraph" id="addNew-Graph">Add Graph</button>
+							</li>
+							<li class="nav-item" role="presentation">
+								<button class="nav-link" data-bs-toggle="tab" data-bs-target="#Addtable" id="AddNewtable">Add Table</button>
+							</li>
+						</ul>
+						<div class="tab-content">
+							<div class="tab-pane fade active show" id="AddGraph">
+
+								<div class="add-box">
+									<div class="row h-100">
+										<div class="col-md-4 col-12 m-auto">
+											<button class="btn btn-lg btn-main m-auto w-100" id="GraphId">Add Graph Manually</button>
+											<br />
+											<input type="file" class="btn btn-lg btn-success m-auto w-100" placeholder="Make Graph For CSV" id="GraphIdforcsv" />
+										</div>
+									</div>
+								</div>
+								<form id="graphForm" class="d-none  mt-2">
+									<div class="row">
+										<div class="col-12">
+											<h3>Chart Settings</h3>
+										</div>
+										<div class="col-md-4 col-12 form-group">
+											<label for="ChartType">Chart Type</label>
+											<select class="form-select" id="ChartType" name="typeid">
+											</select>
+										</div>
+										<div class="col-md-4 col-12 form-group">
+											<label for="graphTitle">Title</label>
+											<input type="text" class="form-control" id="graphTitle" placeholder="Chart title">
+										</div>
+										<div class="col-md-4 col-12 form-group">
+											<label for="graphSubTitle">Sub Title</label>
+											<input type="text" class="form-control" id="graphSubTitle" placeholder="Chart subtitle">
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-12">
+											<h3>X-axis Label</h3>
+										</div>
+										<div class="col-md-4 col-12 form-group">
+											<label for="LabelOrientation">Label Orientation</label>
+											<input type="text" class="form-control" id="LabelOrientation" placeholder="X-axis label">
+										</div>
+									</div>
+									<div id="rowsContainer">
+										<div class="row">
+											<div class="col-md-4 col-12 form-group">
+												<label for="SeriesName">Series Name</label>
+												<input type="text" class="form-control series-name" placeholder="Series Name">
+											</div>
+											<div class="col-md-4 col-12 form-group">
+												<label for="ChartValue">Chart Values</label>
+												<input type="text" class="form-control series-values" placeholder="Comma-separated values (e.g., 10,20,30)">
+											</div>
+											<div class="col-md-3 col-12 form-group">
+												<label for="SeriesColor">Series Color</label>
+												<input type="text" class="form-control series-color" placeholder="Color (e.g., red)">
+											</div>
+											<div class="col-md-1 col-12 mt-auto text-end">
+												<button class="btn btn-sm add-button ms-auto" type="button" id="addSeries">
+													<i class="feather-plus-square fs-2"></i>
+												</button>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 col-12 text-center">
+											<div class="mx-auto">
+												<button type="button" class="btn btn-main mt-3 mx-auto" id="GenerateChart">Generate Chart</button>
+											</div>
+										</div>
+									</div>
+								</form>
+								<div class="MGGraphTable mt-2" id="MGGraphTable">
+									<div class="responsive-table">
+										<table class="table table-bordered" id="MGGraphList">
+											<thead class="table-light">
+												<tr>
+													<th>ID</th>
+													<th>Type</th>
+													<th>Title</th>
+													<th>Sub Title</th>
+													
+													<th class="text-center">Action</th>
+												</tr>
+											</thead>
+											<tbody>
+											</tbody>
+										</table>
+										<div class="d-flex justify-content-center mt-3">
+											<button type="button" class="btn btn-success btn-sm" id="btn_savemultiplegraph">Save Graph</button>
+										</div>
+
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane fade" id="Addtable">
+								<div class="add-box-table">
+									<div class="row h-100">
+										<div class="col-md-4 col-12 m-auto d-block">
+											<button class="btn btn-lg btn-green w-100 display-1" id="CreateNewtable">Add Table</button>
+											<input id="addtablefile" class="btn btn-lg btn-main w-100 d-block mt-3 py-2" type="file" />
+										</div>
+									</div>
+								</div>
+								<form id="tableForm" class="d-none">
+									<div class="row ">
+										<div class="col-12">
+											<div class="add-box-form">
+												<div class="row">
+													<div class="col-12 d-flex align-items-center justify-content-between">
+														<h3>Table Settings</h3>
+														<button type="button" id="clearhtmltablefile" class="btn-sm btn btn-danger">Clear Table</button>
+													</div>
+													<div id="customizetable">
+														<div class="row">
+															<div class="col-md-4 col-12 form-group">
+																<label for="TableName">Table Name</label>
+																<input type="text" class="form-control" id="TableName" placeholder="Enter table name" required>
+															</div>
+															<div class="col-md-3 col-12 form-group">
+																<label for="TableRows">Table Rows</label>
+																<input type="number" class="form-control" id="TableRows" placeholder="Enter table rows" required>
+															</div>
+															<div class="col-md-3 col-12 form-group">
+																<label for="TableColumns">Table Columns</label>
+																<input type="number" class="form-control" id="TableColumns" placeholder="Enter table columns" required>
+															</div>
+															<div class="col-md-2 col-12 mt-auto">
+																<button type="button" class="btn btn-main mt-auto ms-auto" id="GenerateTable">Generate Table</button>
+															</div>
+														</div>
+													</div>
+													<div class="col-md-12 col-12 mt-3 text-center">
+														<div class="table-responsive" id="editable-table">
+															<table class="table table-bordered">
+																<thead class="">
+																</thead>
+																<tbody>
+																</tbody>
+															</table>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 col-12 text-center">
+											<div class="mx-auto">
+												<button type="button" class="btn btn-main mt-3 mx-auto" id="SaveTableSettings">Save Settings</button>
+											</div>
+										</div>
+									</div>
+								</form>
+								<div class="MGTable mt-2 " id="MGTable">
+									<div class="responsive-table">
+										<table class="table table-bordered" id="MGTableList">
+											<thead class="table-light">
+												<tr>
+													<th>ID</th>
+													<th>Name</th>
+													<th class="text-center">Action</th>
+												</tr>
+											</thead>
+											<tbody id="tableBody">
+											</tbody>
+										</table>
+										<div class="d-flex justify-content-center mt-3">
+											<button type="button" class="btn btn-success btn-sm" id="btn_savemultipleTable">Save Table</button>
+										</div>
+
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+					<!-- Add Graph/Add Table ends -->
+				</div>
+				<!-- Slug/categories start -->
+				<div class="row">
+					<div class="col-md-6 col-12">
+						<div class="form-group">
+							<label for="slugs" class="add-title mb-1">Select Slugs</label>
+							<div class="custom-select-container">
+								<select class="js-select2" id="SlugName" name="SlugName" multiple="multiple" data-dropdown-css-class="custom-select2-dropdown">
+								</select>
+								<i data-feather="chevron-down" class="dropdown-icon"></i>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6 col-12">
+						<div class="form-group">
+							<label for="TagsCategories" class="add-title mb-1">Tags / Categories</label>
+							<div class="custom-select-container">
+								<select class="js-select2" id="TagName" name="TagName" multiple="multiple" data-dropdown-css-class="custom-select2-dropdown">
+								</select>
+								<i data-feather="chevron-down" class="dropdown-icon"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Slug/categories ends -->
+			</div>
+		</div>
+		<div class="col-lg-4 col-12">
+			<div class="right-side">
+				<div class="row">
+					<div class="col-12 text-center">
+						<div class="add-title">News Collection</div>
+					</div>
+				</div>
+				<div class="row my-2">
+					<div class="col-12">
+						<div class="accordion" id="NewsCollectionData">
+							<!-- Dynamic Accordion Items will be populated here -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row my-2">
+		<div class="col-12 ">
+			<div class="actionbt-div">
+				<div class="d-flex justify-content-center">
+					<button type="button" id="btn_updatemultipleNews" class="btn btn-md btn-green">Update</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<!--Modal Start-->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="staticBackdropLabel">Collection Information</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="row">
+								<div class="col-12">
+									<h4 class="text-primary collectionheading"></h4>
+									<hr class="collectiondetailhr" />
+									<p class="text-muted collectiondescription"></p>
+								</div>
+								<div class="col-md-12 collectioncontent">
+									<p class="text-dark"></p>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<img src="" alt="Collection Image" class="img-fluid rounded shadow collectionimage">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Modal for viewing media -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="viewModalLabel">View Media</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body text-center">
+				<img id="modalImage" src="" class="img-fluid d-none" alt="Preview">
+				<video id="modalVideo" controls class="d-none w-100">
+					<source id="modalVideoSource" src="" type="video/mp4">
+				</video>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Modal for viewing Graph -->
+<div class="modal fade" id="modalgraphshow" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="exampleModalLabel">Chart Preview</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div id="chartContainer" style="width: 100%; height: 400px;"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Modal for viewing Table -->
+<div id="viewTableModal" class="modal fade" aria-hidden="true" aria-labelledby="" tabindex="-1">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Table Preview</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div id="viewTableContent"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!--Modal End-->
+
+
+@section BottomJS {
+		<script src="~/assets/js/custom-js/MultipleNewsEdit.js"></script>
+		<script src="~/assets/vendors/summernote/summernote-lite.min.js"></script>
+		<script src="~/assets/vendors/select2/select2.min.js"></script>
+		<script src="~/assets/vendors/fonts/feather.min.js"></script>
+		<script src="~/assets/vendors/highcharts/highcharts.js"></script>
+		<script src="~/assets/vendors/highcharts/exporting.js"></script>
+		<script src="~/assets/vendors/xlsx/xlsx.full.min.js"></script>
+}

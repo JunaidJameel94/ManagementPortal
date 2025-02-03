@@ -117,6 +117,7 @@ namespace ManagementPortalApp.Extensions
                 FormID = item.FormID,
                 FormController = item.FormController,
                 FormAction = item.FormAction,
+                IsNavView = item.IsNavView,
                 Childrens = FillRecursive(flatObjects, item.FormID)
             }).ToList();
         }

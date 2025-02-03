@@ -1,0 +1,94 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@{
+	ViewBag.Title = "MG Publisher";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section TopCss {
+	<link rel="stylesheet" href="~/assets/css/MGEditor.css" />
+}
+@{
+	System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+	var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+	var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+	ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+	List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+	var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+	bool _allowinsert = FilterForm.AllowInsert;
+	bool _allowupdate = FilterForm.AllowUpdate;
+	bool _allowdelete = FilterForm.AllowDelete;
+}
+
+<div class="card">
+	<div class="card-body">
+		<main class="mb-12">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12 col-12">
+						<div class="searchbtn">
+							<div class="input-group">
+								<input class="form-control" type="search" placeholder="Search Keyword"
+									   id="searchnewsDetail">
+								<span class="input-group-append">
+									<button class="btn btn-outline-secondary ms-n5" id="btnnewssearch" type="button">
+										<i class="fa fa-search"></i>
+									</button>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr>
+				<div class="row mt-2">
+					<div class="col-12 mb-3 datetab show-change">
+						<div class="news-date" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+							<span class="left-dash"> </span>
+							<span class="newsdatetime">
+								<strong>News Detail</strong>
+							</span>
+							<span class="right-dash"> </span> &nbsp; &nbsp;
+							<i class="fa fa-chevron-right"></i>
+						</div>
+					</div>
+
+					<div class="col-12">
+						<div class="collapse show" id="collapseExample">
+							<div class="newscardgroup">
+								<div class="row">
+									<div class="col-12" id="newsContainer">
+										<!-- News cards will be appended here dynamically -->
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Modal Structure -->
+			<div class="modal fade" id="publisherRemarks" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">Publisher Remarks Send To Editor</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<label for="publisher-remarks">Enter Remarks:</label>
+							<textarea id="publisher-remarks" class="form-control" rows="3" placeholder="Enter your remarks here."></textarea>
+						</div>
+						<div class="modal-footer">
+							<button id="submit-remarks" class="btn btn-primary">Submit Remarks</button>
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+</div>
+
+
+@section BottomJS {
+	<script src="~/assets/js/custom-js/MGPublisher.js"></script>
+}

@@ -7,6 +7,7 @@
         public string? FormAction { get; set; }
         public string? FormDisplayName { get; set; }
         public bool IsActive { get; set; }
+        public bool IsNavView { get; set; }
         public int ParentFormID { get; set; }
     }
 

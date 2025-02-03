@@ -59,7 +59,7 @@ namespace ManagementPortalApi.Controllers
             return Ok(dt);
         }
 
-        [RateLimitMiddleware(10, 5)]
+        //[RateLimitMiddleware(10, 5)]
         [HttpPost]
         public IActionResult InsertUserSession(UserSession session_)
         {
@@ -95,7 +95,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(10, 5)]
+       // [RateLimitMiddleware(10, 5)]
         [HttpPost]
         public IActionResult CheckLoginCreds(LoginCreds logincreds_)
         {
@@ -132,7 +132,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(10, 5)]
+       // [RateLimitMiddleware(10, 5)]
         [HttpPost]
         public IActionResult GetUserInfo(LoginCreds logincreds_)
         {
@@ -170,7 +170,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(10, 5)]
+       // [RateLimitMiddleware(10, 5)]
         [HttpPost]
         public IActionResult GetUserInfoAD(LoginCreds logincreds_)
         {
@@ -242,7 +242,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(10, 5)]
+       // [RateLimitMiddleware(10, 5)]
         [HttpPost]
         public bool ResetUserAttemptCount(LoginCreds logincreds_)
         {
@@ -274,7 +274,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(10, 5)]
+       // [RateLimitMiddleware(10, 5)]
         [HttpPost]
         public string? UpdateUserAttemptCount(LoginCreds logincreds_)
         {
@@ -308,7 +308,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(3, 1440)]
+        //[RateLimitMiddleware(3, 1440)]
         [HttpPost]
         public string? ChangePassword_Login(LoginCreds logincreds_)
         {
@@ -344,7 +344,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(20, 5)]
+        // [RateLimitMiddleware(20, 5)]
         [HttpPost]
         public string CheckOldPassword(LoginCreds logincreds_)
         {
@@ -379,7 +379,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(20, 5)]
+        // [RateLimitMiddleware(20, 5)]
         [HttpPost]
         public IActionResult CheckUserPassword(LoginCreds logincreds_)
         {
@@ -413,7 +413,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(20, 5)]
+        // [RateLimitMiddleware(20, 5)]
         [HttpPost]
         public string? GetUserHashPassword(LoginCreds logincreds_)
         {
@@ -446,7 +446,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(20, 5)]
+        // [RateLimitMiddleware(20, 5)]
         [HttpPost]
         public IActionResult GetUserEmailVerification(EmailVerification emailVerification_)
         {
@@ -479,7 +479,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(20, 5)]
+        // [RateLimitMiddleware(20, 5)]
         [HttpPost]
         public IActionResult ResetUserPassword(EmailVerification emailVerification_)
         {
@@ -514,7 +514,7 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-        [RateLimitMiddleware(20, 5)]
+        // [RateLimitMiddleware(20, 5)]
         [HttpPost]
         public IActionResult GetSMTPSettings()
         {
@@ -538,7 +538,7 @@ namespace ManagementPortalApi.Controllers
 
         }
 
-        [RateLimitMiddleware(20, 5)]
+        // [RateLimitMiddleware(20, 5)]
         [HttpPost]
         public IActionResult GetNavigationSettings(LoginCreds logincreds_)
         {

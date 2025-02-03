@@ -1,0 +1,95 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@{
+    ViewBag.Title = "API Let & See";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+    var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+    var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+    ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+    List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+    var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+    bool _allowinsert = FilterForm.AllowInsert;
+    bool _allowupdate = FilterForm.AllowUpdate;
+    bool _allowdelete = FilterForm.AllowDelete;
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex">
+                <h4 class="mb-0">Manage API Let & See</h4>
+            </div>
+            <div class="card-body">
+                <form id="apiEndpointsForm" name="apiEndpointsForm" method="post" autocomplete="off">
+                    <div class="row">
+                        <input type="hidden" id="EndPointID" name="EndPointID" value="">
+                        <div class="col-lg-4">
+                            <label for="endpointName">Module Name</label>
+                            <input type="text" class="form-control" id="EndPointName" name="EndPointName" required>
+                        </div>
+                        <div class="col-lg-2">
+                            <label for="apiDelay">API Delay (ms)</label>
+                            <input type="number" class="form-control" id="ApiDelay" name="ApiDelay" min="0" required>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12 d-flex justify-content-end">
+                            <button type="button" class="btn btn-primary btn-sm savebutton" id="SaveBtn">
+                                <i class="feather-save pe-2"></i>Save
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm updatebutton d-none ms-2" id="UpdateBtn">
+                                <i class="feather-refresh-cw pe-2"></i>Update
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm ms-2" id="ClearBtn">
+                                <i class="feather-trash-2 pe-2"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div id="UserListDiv">
+                    <div class="div-loader">
+                        <div class="loader-wrapper d-none">
+                            <span class="loader"></span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="apiendpointTable">
+                                <thead>
+                                    <tr>
+                                        <th>Module Name</th>
+                                        <th>Delay</th>
+
+                                        @if (_allowupdate)
+                                        {
+                                            <th>Edit</th>
+                                        }
+                                        @if (_allowdelete)
+                                        {
+                                            <th>Delete</th>
+                                        }
+                                       
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section BottomJS {
+    <script src="~/assets/js/custom-js/ApiEndPoint.js"></script>
+}

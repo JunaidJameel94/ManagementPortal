@@ -1,0 +1,138 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+
+@{
+    ViewBag.Title = "Planning";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section TopCss {
+
+    <link href="~/assets/css/planning.css" rel="stylesheet" />
+}
+@{
+    System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+    var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+    var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+    ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+    List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+    var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+    bool _allowinsert = FilterForm.AllowInsert;
+    bool _allowupdate = FilterForm.AllowUpdate;
+    bool _allowdelete = FilterForm.AllowDelete;
+}
+<div class="card">
+    <div class="card-body">
+        <div class="planing-page">
+            <div class="row planingsearch">
+                <div class="col-md-12 col-12">
+                    <div class="searchbtn">
+                        <div class="input-group">
+                            <input class="form-control" type="search" placeholder="Search Keyword"
+                                   id="search_planning">
+                            <span class="input-group-append">
+                                <button class="btn btn-outline-secondary ms-n5" id="btn_searchplanning" type="button">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-lg-3 col-6 my-md-auto my-2">
+                    <div class="itemcounting">
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6 ms-auto downldCSV">
+                    <div class="dropdown filter-dropdown">
+                        <a class="btn  btn-md btn-light-brand" data-bs-toggle="dropdown"
+                           data-bs-offset="0, 10" data-bs-auto-close="outside" aria-expanded="false" id="celedersdropdown">
+                            <i class="feather-download me-2"></i>
+                            <span> Download</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+
+
+                            <a href="javascript:void(0);" class="dropdown-item" id="download-csv">
+                                <i class="feather-text me-3"></i>
+                                <span>CSV</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-6">
+                    <button class="btn btn-md btn-primary  w-100" data-bs-toggle="modal" id="AddPlanningbtn">  <i class="fa fa-plus"></i> &nbsp; Add Planning</button>
+                </div>
+            </div>
+            <div class="row mt-2">
+
+                <div class="col-12">
+                    <div class="collapse show" id="collapseExample">
+                        <div class="news-cardgroup">
+                            <!-- This is where planning cards will be dynamically added -->
+                            <div class="row" id="planningContainer">
+                                <!-- Planning cards will be appended here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- modal end here -->
+<!-- Modal -->
+<div class="modal fade" id="AddPlanning" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header headerbgcolor">
+                <h1 class="modal-title fs-5" id="AddPlanningLabel">Add Planning</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="" id="PlanningForm">
+                    <div class="row">
+                        <div class="col-md-12 col-12">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" aria-describedby="titleHelp">
+                        </div>
+                        <div class="col-md-12 col-12">
+                            <label for="p_description" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="p_description" name="p_description" aria-describedby="titleHelp">
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col-md-6 col-12">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="p_categoryid" name="p_categoryid">
+                            </select>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="planning_date" name="planning_date">
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="country" name="country">
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <label for="Time" class="form-label">Time</label>
+                            <input type="time" class="form-control" id="PlanningTime" name="PlanningTime" step="1">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-light-brand" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="btn_saveplanning" class="btn btn-primary" data-bs-target="submit">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section BottomJS {
+    <script src="~/assets/js/custom-js/Planning.js"></script>
+}

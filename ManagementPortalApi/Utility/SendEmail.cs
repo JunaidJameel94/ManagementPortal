@@ -35,7 +35,7 @@ namespace ManagementPortalApi.Utility
                     {
                         UseDefaultCredentials = false,
                         Credentials = new NetworkCredential(smtpUsername, smtpPassword),
-                        EnableSsl = true
+                        EnableSsl = false
                     };
 
                     // Create Compose Email

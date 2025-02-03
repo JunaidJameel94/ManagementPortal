@@ -1,0 +1,65 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@{
+    ViewBag.Title = "MG News";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section TopCss {
+   <link rel="stylesheet" href="~/assets/css/MGNews.css" />
+}
+@{
+    System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+    var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+    var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+    ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+    List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+    var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+    bool _allowinsert = FilterForm.AllowInsert;
+    bool _allowupdate = FilterForm.AllowUpdate;
+    bool _allowdelete = FilterForm.AllowDelete;
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-block">
+                <div class="row">
+                    <div class="col-lg-5 col-12">
+                        <h3>Select Template Design</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 d-flex justify-content-around">
+                        <!-- Image 1 -->
+                        <div class="text-center">
+                            <h4>Single Header</h4>
+                            <div class="image-container">
+                                <a href="@Url.ActionLink("CreateSingleNews","Feed")">
+                                    <!-- Replace with your actual URL -->
+                                    <img src="~/assets/images/Step-1-add graph.png" alt="Template 1" class="preview-image">
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Image 2 -->
+                        <div class="text-center">
+                            <h4>Multiple Header</h4>
+                            <div class="image-container">
+                                <a href="@Url.ActionLink("CreateMultipleNews","Feed")">
+                                    <!-- Replace with your actual URL -->
+                                    <img src="~/assets/images/Step-1-a.png" alt="Template 2" class="preview-image">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section BottomJS {
+    <script src="~/assets/js/custom-js/MGNews.js"></script>
+}

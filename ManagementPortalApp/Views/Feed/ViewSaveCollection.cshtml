@@ -1,0 +1,169 @@
+﻿@inject ManagementPortalApp.Models.Session.Sessions Sessions_
+@* @{
+    ViewBag.Title = "View Save Collection";
+    Layout = "~/Views/Shared/_FeedLayout.cshtml";
+} *@
+@{
+    ViewBag.Title = "View Save Collection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section TopCss {
+
+    <link href="~/assets/css/feeddata.css" rel="stylesheet" />
+}
+
+@{
+    System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
+    var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();
+    var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+    ManagementPortalApp.Models.Session.SessionItems sessionItems = Sessions_.GetSession(UniqueKey, UserID);
+    List<ManagementPortalApp.Models.Authentication.RolesMapping> rolesMapping = sessionItems.rolesMapping;
+    var FilterForm = rolesMapping.FirstOrDefault(x => x.FormName == Context.Request.RouteValues["controller"] + "/" + Context.Request.RouteValues["action"]);
+    bool _allowinsert = FilterForm.AllowInsert;
+    bool _allowupdate = FilterForm.AllowUpdate;
+    bool _allowdelete = FilterForm.AllowDelete;
+}
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-md-7 col-12 my-auto">
+            <h2 id="CollectionName">Collections > <span></span></h2>
+        </div>
+    </div>
+    <div class="tab-pane fade show active" id="All-tab-pane" role="tabpanel" aria-labelledby="All-tab" tabindex="0">
+        <div class="news-card">
+            <hr />
+            <div class="row my-5" id="all-tab-container">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal pic-->
+<div class="modal news-modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+     tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <div class="row w-100">
+
+                    <div class=" col-12 text-end">
+                        <div class="d-flex justify-content-end w-100">
+
+                            <span class="close-btn">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="row">
+                            <div class="col-md-4 col-12">
+                                <div class="news-title-links">
+                                    <ul>
+
+                                        <li class="" id="modalcategory"></li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <div class="date-tpe">
+                                    <p class="mb-0"> <strong id="modaldate"> </strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                       
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div id="newstitle">
+                                    <h3></h3>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="info-div">
+                                    <div class="row">
+                                        <div class="col-md-1 my-auto">
+                                            <i class="fas fa-info-circle fa-2x"></i>
+                                        </div>
+                                        <div class="col-md-11" id="newdescription">
+                                            <p>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="scrolable"> 
+                            <div class="col-12 my-2">
+                                <div class="full-imgbox text-center" id="feedimage">
+                                    <img src="" class="img-fluid" alt="">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="new-windodiv">
+                                    <div class="row">
+                                        <div class="col-md-11" id="newcontent">
+                                            <p class="newcontentstyle">
+
+                                            </p>
+                                        </div>
+                                        <div class="col-md-1 mb-auto">
+                                            <a href="" target="_blank">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            </div>
+                        </div>
+                       
+                    </div>
+                    <div class="col-lg-3 modalright-site">
+                        <div class="row">
+                          
+                            <div class="col-12 my-2 text-center Add-collection">
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary w-100" type="button" aria-expanded="false" id="btnremovecollection">
+                                        <i class="fas fa-bookmark"></i> &nbsp; Remove to collection
+                                    </button>
+                                </div>
+                            </div>
+                            
+
+                        </div>
+                        <hr>
+                        <div class="row  ">
+                            <div class="col-12">
+                                <h6>
+                                    DETAILS
+                                </h6>
+                            </div>
+                            <div class="col-12 dates-div">
+                                <span> <strong> Date:</strong></span>
+                                <span class="datetime" id="PublicationDate"></span>
+                            </div>
+                            <div class="col-12 Source-divs">
+                                <span> <strong>Source: </strong></span>
+                                <span class="Source"><a href="" id="modalsource"> </a> </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal pic END-->
+@section BottomJS {
+    <script src="~/assets/js/custom-js/ViewSaveCollection.js"></script>
+}
