@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using ManagementPortalApp.Utility;
 
 namespace ManagementPortalApp.Controllers
 {
+    [Authorize(AuthenticationSchemes = "ASPXAUTH")]
+    [TypeFilter(typeof(AuthenticationAccess))]
     public class FeedController : Controller
     {
         public IActionResult Feed()
