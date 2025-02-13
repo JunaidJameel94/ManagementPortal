@@ -158,6 +158,11 @@ function SaveFeedLink() {
                         footer: ''
                     });
 
+
+                    $('#feed_name').val('');
+                    $('#FeedURL').val('');
+                    $('#FormatNameID').val('');
+
                     HideLoader('CountriesDiv');
                 }
                 if (error) {
@@ -215,6 +220,10 @@ function UpdateFeedLink() {
                         text: 'Feed Link Updated Successfully!',
                         footer: ''
                     });
+                    $('#feed_name').val('');
+                    $('#FeedURL').val('');
+                    $('#FormatNameID').val('');
+
                 }
                 if (error) {
 
@@ -256,6 +265,9 @@ function DeleteFeedLink(ID) {
                         text: 'Feed Link Deleted Successfully!',
                         footer: ''
                     });
+                    $('#feed_name').val('');
+                    $('#FeedURL').val('');
+                    $('#FormatNameID').val('');
 
                     HideLoader('FeedLinkMasterDiv');
                 }

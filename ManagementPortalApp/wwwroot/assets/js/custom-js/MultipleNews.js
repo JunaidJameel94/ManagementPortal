@@ -1054,7 +1054,7 @@ function SaveMultipleNews() {
         $table.find('thead tr').each(function (rowIndex) {
             $(this).find('th').each(function (colIndex) {
                 var headerContent = $(this).text().trim(); // Ensure text content is captured
-                if (headerContent) { // Only push if content is not empty
+                if (headerContent && headerContent !== table.name) { // Exclude table name
                     tableRows.push({
                         rownumber: rowIndex + 1,
                         columnnumber: colIndex + 1,

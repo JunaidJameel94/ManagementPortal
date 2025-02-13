@@ -50,6 +50,35 @@ function GetNewsDetail() {
                                     </div>`;
                                 $('#newsContainer').append(newsItem); 
                             }
+
+                            else if (detail.NewsStatus == 3) {
+                                var newsItem = `
+                                <div class="row align-items-center">
+                                    <div class="col-md-2 col-12 text-center">
+                                        <div class="newsimg-div">
+                                            <img src="${detail.Newsimage}" class="img-fluid rounded" alt="News Image">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="news-maintitle">
+                                            <h5 class="font-weight-bold">${detail.title}</h5>
+                                        </div>
+                                        <div class="news-description">
+                                            <p class="text-muted">${detail.newsdescription}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 col-12 text-center">
+                                        <div class="action-btns">
+                                            <div class="row">
+                                                <div class="d-flex justify-content-evenly">
+                                                    This News is Live
+                                                </div>
+                                             </div>
+                                        </div>
+                                    </div>
+                                    </div>`;
+                                $('#newsContainer').append(newsItem);
+                            }
                         });
                         $('.sendtoeditor-btn').click(function () {
                             newsID = $(this).data('id');
