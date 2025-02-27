@@ -55,19 +55,23 @@ function GetFeedLink() {
                         $.each(FeedLink, function (i, option) {
                             var UpdateBtn = (data_[0].AllowUpdate == true) ? '<td><button class="btn btn-sm btn-info EditFeedLink" data-value="' + option.ID + '" type="button"><i class="feather-edit-3"></i></button></td>' : '';
                             var DeleteBtn = (data_[0].AllowDelete == true) ? '<td><button class="btn btn-sm btn-danger DeleteFeedLink" data-value="' + option.ID + '" type="button"><i class="feather-trash"></i></button></td>' : '';
-
-                            $('#FeedLink-master tbody').append(
-                                '<tr id="rowid-' + i + '">' +
-                                '<td>' + option.feed_name + '</td>' +
+                            if (option.IsActive == 1) {
+                                $('#FeedLink-master tbody').append(
+                                    '<tr id="rowid-' + i + '">' +
+                                    '<td>' + option.feed_name + '</td>' +
                                     '<td><a href="' + option.FeedURL + '">' + option.FeedURL + '</a></td>' +
-                                '<td>' + (option.FormatName != null ? option.FormatName : '-') + '</td>' +
+                                    '<td>' + (option.FormatName != null ? option.FormatName : '-') + '</td>' +
 
 
-                                '<td>' + (option.IsActive == "0" ? 'Not Active' : 'Active') + '</td>' +
-                                UpdateBtn +
-                                DeleteBtn +
-                                '</tr>'
-                            );
+                                    '<td>' + (option.IsActive == "0" ? 'Not Active' : 'Active') + '</td>' +
+                                    UpdateBtn +
+                                    DeleteBtn +
+                                    '</tr>'
+                                );
+
+                            }
+
+                            
                         });
 
                         $('.EditFeedLink').on('click', function () {
@@ -158,7 +162,6 @@ function SaveFeedLink() {
                         footer: ''
                     });
 
-
                     $('#feed_name').val('');
                     $('#FeedURL').val('');
                     $('#FormatNameID').val('');
@@ -220,10 +223,10 @@ function UpdateFeedLink() {
                         text: 'Feed Link Updated Successfully!',
                         footer: ''
                     });
+
                     $('#feed_name').val('');
                     $('#FeedURL').val('');
                     $('#FormatNameID').val('');
-
                 }
                 if (error) {
 
@@ -265,9 +268,6 @@ function DeleteFeedLink(ID) {
                         text: 'Feed Link Deleted Successfully!',
                         footer: ''
                     });
-                    $('#feed_name').val('');
-                    $('#FeedURL').val('');
-                    $('#FormatNameID').val('');
 
                     HideLoader('FeedLinkMasterDiv');
                 }

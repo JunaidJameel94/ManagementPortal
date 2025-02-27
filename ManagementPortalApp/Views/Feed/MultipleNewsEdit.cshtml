@@ -20,7 +20,6 @@
 	bool _allowupdate = FilterForm.AllowUpdate;
 	bool _allowdelete = FilterForm.AllowDelete;
 }
-
 <div class="creations-multi">
 	<input type="hidden" id="newsid" value="@ViewBag.NewsID" />
 	<div class="row">
@@ -314,7 +313,7 @@
 				</div>
 				<!-- Slug/categories start -->
 				<div class="row">
-					<div class="col-md-6 col-12">
+					<div class="col-md-3 col-12">
 						<div class="form-group">
 							<label for="slugs" class="add-title mb-1">Select Slugs</label>
 							<div class="custom-select-container">
@@ -324,13 +323,32 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-md-6 col-12">
+					<div class="col-md-3 col-12">
 						<div class="form-group">
 							<label for="TagsCategories" class="add-title mb-1">Tags / Categories</label>
 							<div class="custom-select-container">
 								<select class="js-select2" id="TagName" name="TagName" multiple="multiple" data-dropdown-css-class="custom-select2-dropdown">
 								</select>
 								<i data-feather="chevron-down" class="dropdown-icon"></i>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3 col-12">
+						<div class="form-group">
+							<label for="AuthorName" class="add-title mb-1">Select Author</label>
+							<div class="custom-select-container">
+								<select class="form-control" id="AuthorName" name="AuthorName">
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3 col-12">
+						<div class="form-group">
+							<label for="CategoryName" class="add-title mb-1">Select Category</label>
+							<div class="custom-select-container">
+								<select class="form-control" id="CategoryName" name="CategoryName">
+								</select>
 							</div>
 						</div>
 					</div>
@@ -358,7 +376,9 @@
 	<div class="row my-2">
 		<div class="col-12 ">
 			<div class="actionbt-div">
-				<div class="d-flex justify-content-center">
+				<div class="d-flex justify-content-center align-items-center gap-2">
+					<input type="checkbox" id="chkHighlighted" name="highlighted">
+					<label for="chkHighlighted" class="mb-0">Highlighted</label>	
 					<button type="button" id="btn_updatemultipleNews" class="btn btn-md btn-green">Update</button>
 				</div>
 			</div>

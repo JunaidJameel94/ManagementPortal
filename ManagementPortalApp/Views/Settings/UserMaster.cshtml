@@ -3,7 +3,6 @@
     ViewBag.Title = "Users";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 @{
     System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
     var UniqueKey = (from c in claimsPrincipal.Claims where c.Type == "Guid" select c.Value).FirstOrDefault();

@@ -1754,5 +1754,364 @@ namespace ManagementPortalApi.Controllers
 
         #endregion
 
+
+        #region Author Master
+        [RateLimitMiddleware(100, 5)]
+        [HttpGet]
+        public IActionResult GetALLAuthor()
+        {
+            DataTable dt = new DataTable();
+            try
+            {
+                dt = _DAL.GetData("sp_select_news_author", null, _DAL.CSManagementPortalDatabase);
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get + "sp_select_news_author");
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get2 + "sp_select_news_author");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+            return Ok(dt);
+        }
+
+        [RateLimitMiddleware(100, 5)]
+        [HttpGet]
+        public IActionResult GetAuthorByID(string AuthorID)
+        {
+            DataTable dt = new DataTable();
+            string methodName = MethodBase.GetCurrentMethod().Name;
+            try
+            {
+                NameValueCollection? nv = new NameValueCollection();
+                nv.Clear();
+                nv.Add("AuthorID-INT", AuthorID);
+                dt = _DAL.GetData("sp_get_authorbyid", nv, _DAL.CSManagementPortalDatabase);
+                nv = null;
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get + "sp_get_authorbyid");
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get2 + "sp_get_authorbyid");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+            return Ok(dt);
+        }
+
+        [RateLimitMiddleware(50, 5)]
+        [HttpPost]
+        public IActionResult EditAuthor([FromBody] AuthorMaster authorMaster)
+        {
+            bool Result = false;
+            try
+            {
+                string encrypted_password = string.Empty;
+                string RandomStrings = _randomstringgenerator.GetRandomString();
+                encrypted_password = _dataencryptor.HashPassword(RandomStrings);
+
+                NameValueCollection? nv = new NameValueCollection();
+                nv.Clear();
+                nv.Add("AuthorID-INT", authorMaster.AuthorID);
+                nv.Add("AuthorName-NVARCHAR", HttpUtility.HtmlEncode(authorMaster.AuthorName));
+                nv.Add("IsActive-BIT", HttpUtility.HtmlEncode(authorMaster.IsActive));
+                Result = _DAL.InsertData("sp_update_author", nv, _DAL.CSManagementPortalDatabase);
+                nv = null;
+
+                if (Result)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Update, ActivityLog.ActivityDetails_Update + "sp_update_author");
+
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Update, ActivityLog.ActivityDetails_Update2 + "sp_update_author");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+
+            if (Result)
+            {
+                return Ok(Result);
+            }
+            else
+            {
+                return BadRequest(Result);
+            }
+        }
+
+        [RateLimitMiddleware(50, 5)]
+        [HttpPost]
+        public IActionResult SaveAuthor([FromBody] AuthorMaster authorMaster)
+        {
+            bool Result = false;
+            try
+            {
+                NameValueCollection? nv = new NameValueCollection();
+                nv.Clear();
+                nv.Add("AuthorName-NVARCHAR", HttpUtility.HtmlEncode(authorMaster.AuthorName));
+                nv.Add("IsActive-BIT", HttpUtility.HtmlEncode(authorMaster.IsActive));
+                Result = _DAL.InsertData("sp_insert_author", nv, _DAL.CSManagementPortalDatabase);
+                nv = null;
+
+                if (Result)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Insert, ActivityLog.ActivityDetails_Insert + "sp_insert_author");
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Insert, ActivityLog.ActivityDetails_Insert2 + "sp_insert_author");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+
+            if (Result)
+            {
+                return Ok(Result);
+            }
+            else
+            {
+                return BadRequest(Result);
+            }
+        }
+
+        [RateLimitMiddleware(50, 5)]
+        [HttpPost]
+        public IActionResult DeleteAuthor([FromBody] DeleteFromDB deleteFromDB_)
+        {
+            bool Result = false;
+            try
+            {
+                NameValueCollection? nv = new NameValueCollection();
+                nv.Clear();
+                nv.Add("AuthorID-INT", deleteFromDB_.AuthorID);
+                Result = _DAL.InsertData("sp_delete_author", nv, _DAL.CSManagementPortalDatabase);
+                nv = null;
+
+                if (Result)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Delete, ActivityLog.ActivityDetails_Delete + "sp_delete_author");
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Delete, ActivityLog.ActivityDetails_Delete2 + "sp_delete_author");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+
+            return Ok(Result);
+        }
+
+        #endregion
+
+        #region Category Master
+        [RateLimitMiddleware(100, 5)]
+        [HttpGet]
+        public IActionResult GetALLCategory()
+        {
+            DataTable dt = new DataTable();
+            try
+            {
+                dt = _DAL.GetData("sp_select_news_Category", null, _DAL.CSManagementPortalDatabase);
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get + "sp_select_news_Category");
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get2 + "sp_select_news_Category");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+            return Ok(dt);
+        }
+
+        [RateLimitMiddleware(100, 5)]
+        [HttpGet]
+        public IActionResult GetCategoryByID(string CategoryID)
+        {
+            DataTable dt = new DataTable();
+            string methodName = MethodBase.GetCurrentMethod().Name;
+            try
+            {
+                NameValueCollection? nv = new NameValueCollection();
+                nv.Clear();
+                nv.Add("CategoryID-INT", CategoryID);
+                dt = _DAL.GetData("sp_get_categorybyid", nv, _DAL.CSManagementPortalDatabase);
+                nv = null;
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get + "sp_get_categorybyid");
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get2 + "sp_get_categorybyid");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+            return Ok(dt);
+        }
+
+        [RateLimitMiddleware(50, 5)]
+        [HttpPost]
+        public IActionResult EditCategory([FromBody] CategoryMaster categoryMaster)
+        {
+            bool Result = false;
+            try
+            {
+                string encrypted_password = string.Empty;
+                string RandomStrings = _randomstringgenerator.GetRandomString();
+                encrypted_password = _dataencryptor.HashPassword(RandomStrings);
+
+                NameValueCollection? nv = new NameValueCollection();
+                nv.Clear();
+                nv.Add("CategoryID-INT", categoryMaster.CategoryID);
+                nv.Add("CategoryName-NVARCHAR", HttpUtility.HtmlEncode(categoryMaster.CategoryName));
+                nv.Add("IsActive-BIT", HttpUtility.HtmlEncode(categoryMaster.IsActive));
+                Result = _DAL.InsertData("sp_update_category", nv, _DAL.CSManagementPortalDatabase);
+                nv = null;
+
+                if (Result)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Update, ActivityLog.ActivityDetails_Update + "sp_update_category");
+
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Update, ActivityLog.ActivityDetails_Update2 + "sp_update_category");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+
+            if (Result)
+            {
+                return Ok(Result);
+            }
+            else
+            {
+                return BadRequest(Result);
+            }
+        }
+
+        [RateLimitMiddleware(50, 5)]
+        [HttpPost]
+        public IActionResult SaveCategory([FromBody] CategoryMaster categoryMaster)
+        {
+            bool Result = false;
+            try
+            {
+                NameValueCollection? nv = new NameValueCollection();
+                nv.Clear();
+                nv.Add("CategoryName-NVARCHAR", HttpUtility.HtmlEncode(categoryMaster.CategoryName));
+                nv.Add("IsActive-BIT", HttpUtility.HtmlEncode(categoryMaster.IsActive));
+                Result = _DAL.InsertData("sp_insert_Category", nv, _DAL.CSManagementPortalDatabase);
+                nv = null;
+
+                if (Result)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Insert, ActivityLog.ActivityDetails_Insert + "sp_insert_Category");
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Insert, ActivityLog.ActivityDetails_Insert2 + "sp_insert_Category");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+
+            if (Result)
+            {
+                return Ok(Result);
+            }
+            else
+            {
+                return BadRequest(Result);
+            }
+        }
+
+        [RateLimitMiddleware(50, 5)]
+        [HttpPost]
+        public IActionResult DeleteCategory([FromBody] DeleteFromDB deleteFromDB_)
+        {
+            bool Result = false;
+            try
+            {
+                NameValueCollection? nv = new NameValueCollection();
+                nv.Clear();
+                nv.Add("CategoryID-INT", deleteFromDB_.AuthorID);
+                Result = _DAL.InsertData("sp_delete_category", nv, _DAL.CSManagementPortalDatabase);
+                nv = null;
+
+                if (Result)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Delete, ActivityLog.ActivityDetails_Delete + "sp_delete_author");
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Delete, ActivityLog.ActivityDetails_Delete2 + "sp_delete_author");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FormsController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+
+            return Ok(Result);
+        }
+        #endregion
     }
 }

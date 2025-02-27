@@ -631,16 +631,63 @@ namespace ManagementPortalApp.Controllers
         }
         #endregion
 
-        #endregion
 
-        #region Forms Pages
-        #region Category
+        #region Author Master
+        [HttpGet]
+        //[TypeFilter(typeof(AllowedApiAccess))]
+
+        public IActionResult GetALLAuthor()
+        {
+            HttpResponseMessage response = UseHttpClientGet(null, "GetALLAuthor", "Settings");
+            return new HttpResponseMessageResult(response);
+        }
 
         [HttpGet]
         [TypeFilter(typeof(AllowedApiAccess))]
-        public IActionResult GetCategory()
+        public IActionResult GetAuthorByID(string AuthorID)
         {
-            HttpResponseMessage response = UseHttpClientGet(null, "GetCategory", "Forms");
+            HttpResponseMessage response = UseHttpClientGet("?AuthorID=" + AuthorID, "GetAuthorByID", "Settings");
+            return new HttpResponseMessageResult(response);
+        }
+
+        [HttpPost]
+        [TypeFilter(typeof(AllowedApiAccess))]
+        public IActionResult EditAuthor([FromBody] AuthorMaster authorMaster)
+        {
+            UserInfo userinfo = GetUserInformation();
+            string jsonString = JsonConvert.SerializeObject(authorMaster);
+            HttpResponseMessage response = UseHttpClientPost(jsonString, "EditAuthor", "Settings");
+            return new HttpResponseMessageResult(response);
+        }
+
+        [HttpPost]
+        [TypeFilter(typeof(AllowedApiAccess))]
+        public IActionResult SaveAuthor([FromBody] AuthorMaster authorMaster)
+        {
+            UserInfo userinfo = GetUserInformation();
+            string jsonString = JsonConvert.SerializeObject(authorMaster);
+            HttpResponseMessage response = UseHttpClientPost(jsonString, "SaveAuthor", "Settings");
+            return new HttpResponseMessageResult(response);
+        }
+
+        [HttpPost]
+        [TypeFilter(typeof(AllowedApiAccess))]
+        public IActionResult DeleteAuthor([FromBody] DeleteFromDB Data)
+        {
+            string jsonString = JsonConvert.SerializeObject(Data);
+            HttpResponseMessage response = UseHttpClientPost(jsonString, "DeleteAuthor", "Settings");
+            return new HttpResponseMessageResult(response);
+        }
+        #endregion
+
+
+        #region Category Master
+        [HttpGet]
+        //[TypeFilter(typeof(AllowedApiAccess))]
+
+        public IActionResult GetALLCategory()
+        {
+            HttpResponseMessage response = UseHttpClientGet(null, "GetALLCategory", "Settings");
             return new HttpResponseMessageResult(response);
         }
 
@@ -648,29 +695,27 @@ namespace ManagementPortalApp.Controllers
         [TypeFilter(typeof(AllowedApiAccess))]
         public IActionResult GetCategoryByID(string CategoryID)
         {
-            HttpResponseMessage response = UseHttpClientGet("?CategoryID=" + CategoryID, "GetCategoryByID", "Forms");
+            HttpResponseMessage response = UseHttpClientGet("?CategoryID=" + CategoryID, "GetCategoryByID", "Settings");
             return new HttpResponseMessageResult(response);
         }
 
         [HttpPost]
         [TypeFilter(typeof(AllowedApiAccess))]
-        public IActionResult EditCategory([FromBody] Category category)
+        public IActionResult EditCategory([FromBody] CategoryMaster categoryMaster)
         {
             UserInfo userinfo = GetUserInformation();
-            category.UserID = userinfo.UserID.ToString();
-            string jsonString = JsonConvert.SerializeObject(category);
-            HttpResponseMessage response = UseHttpClientPost(jsonString, "EditCategory", "Forms");
+            string jsonString = JsonConvert.SerializeObject(categoryMaster);
+            HttpResponseMessage response = UseHttpClientPost(jsonString, "EditCategory", "Settings");
             return new HttpResponseMessageResult(response);
         }
 
         [HttpPost]
         [TypeFilter(typeof(AllowedApiAccess))]
-        public IActionResult SaveCategory([FromBody] Category category)
+        public IActionResult SaveCategory([FromBody] CategoryMaster categoryMaster)
         {
             UserInfo userinfo = GetUserInformation();
-            category.UserID = userinfo.UserID.ToString();
-            string jsonString = JsonConvert.SerializeObject(category);
-            HttpResponseMessage response = UseHttpClientPost(jsonString, "SaveCategory", "Forms");
+            string jsonString = JsonConvert.SerializeObject(categoryMaster);
+            HttpResponseMessage response = UseHttpClientPost(jsonString, "SaveCategory", "Settings");
             return new HttpResponseMessageResult(response);
         }
 
@@ -678,13 +723,68 @@ namespace ManagementPortalApp.Controllers
         [TypeFilter(typeof(AllowedApiAccess))]
         public IActionResult DeleteCategory([FromBody] DeleteFromDB Data)
         {
-            UserInfo userinfo = GetUserInformation();
-            Data.UserID = userinfo.UserID.ToString();
             string jsonString = JsonConvert.SerializeObject(Data);
-            HttpResponseMessage response = UseHttpClientPost(jsonString, "DeleteCategory", "Forms");
+            HttpResponseMessage response = UseHttpClientPost(jsonString, "DeleteCategory", "Settings");
             return new HttpResponseMessageResult(response);
         }
         #endregion
+
+
+
+        #endregion
+
+        #region Forms Pages
+        //#region Category
+
+        //[HttpGet]
+        //[TypeFilter(typeof(AllowedApiAccess))]
+        //public IActionResult GetCategory()
+        //{
+        //    HttpResponseMessage response = UseHttpClientGet(null, "GetCategory", "Forms");
+        //    return new HttpResponseMessageResult(response);
+        //}
+
+        //[HttpGet]
+        //[TypeFilter(typeof(AllowedApiAccess))]
+        //public IActionResult GetCategoryByID(string CategoryID)
+        //{
+        //    HttpResponseMessage response = UseHttpClientGet("?CategoryID=" + CategoryID, "GetCategoryByID", "Forms");
+        //    return new HttpResponseMessageResult(response);
+        //}
+
+        //[HttpPost]
+        //[TypeFilter(typeof(AllowedApiAccess))]
+        //public IActionResult EditCategory([FromBody] Category category)
+        //{
+        //    UserInfo userinfo = GetUserInformation();
+        //    category.UserID = userinfo.UserID.ToString();
+        //    string jsonString = JsonConvert.SerializeObject(category);
+        //    HttpResponseMessage response = UseHttpClientPost(jsonString, "EditCategory", "Forms");
+        //    return new HttpResponseMessageResult(response);
+        //}
+
+        //[HttpPost]
+        //[TypeFilter(typeof(AllowedApiAccess))]
+        //public IActionResult SaveCategory([FromBody] Category category)
+        //{
+        //    UserInfo userinfo = GetUserInformation();
+        //    category.UserID = userinfo.UserID.ToString();
+        //    string jsonString = JsonConvert.SerializeObject(category);
+        //    HttpResponseMessage response = UseHttpClientPost(jsonString, "SaveCategory", "Forms");
+        //    return new HttpResponseMessageResult(response);
+        //}
+
+        //[HttpPost]
+        //[TypeFilter(typeof(AllowedApiAccess))]
+        //public IActionResult DeleteCategory([FromBody] DeleteFromDB Data)
+        //{
+        //    UserInfo userinfo = GetUserInformation();
+        //    Data.UserID = userinfo.UserID.ToString();
+        //    string jsonString = JsonConvert.SerializeObject(Data);
+        //    HttpResponseMessage response = UseHttpClientPost(jsonString, "DeleteCategory", "Forms");
+        //    return new HttpResponseMessageResult(response);
+        //}
+        //#endregion
 
         #region Feed LINK Created
         [HttpGet]
@@ -1524,7 +1624,7 @@ namespace ManagementPortalApp.Controllers
             List<RolesMapping> _rolesmapping = GetSession("/Feed/MGEditor");
             if (_rolesmapping[0].IsView)
             {
-                HttpResponseMessage response = UseHttpClientGet(null, "Get_News_Detail", "Feed");
+                HttpResponseMessage response = UseHttpClientGet(null, "Get_News_DetailForMGEditor", "Feed");
                 return new HttpResponseMessageResult(response);
             }
             else
@@ -1540,7 +1640,7 @@ namespace ManagementPortalApp.Controllers
             List<RolesMapping> _rolesmapping = GetSession("/Feed/MGPublisher");
             if (_rolesmapping[0].IsView)
             {
-                HttpResponseMessage response = UseHttpClientGet(null, "Get_News_Detail", "Feed");
+                HttpResponseMessage response = UseHttpClientGet(null, "Get_News_DetailForMGPublisher", "Feed");
                 return new HttpResponseMessageResult(response);
             }
             else
@@ -2638,7 +2738,10 @@ namespace ManagementPortalApp.Controllers
         public string? TemplateID { get; set; }
         public List<string>? TagID { get; set; }
         public List<string>? SlugID { get; set; }
+        public string? AuthorID { get; set; }
+        public string? CategoryID { get; set; }
         public string? NewsStatus { get; set; }
+        public string? Highlighted { get; set; }
         public string? Islive { get; set; }
 
         // Graph-related properties
@@ -2687,6 +2790,9 @@ namespace ManagementPortalApp.Controllers
         public string? TemplateID { get; set; }
         public List<string>? TagID { get; set; }
         public List<string>? SlugID { get; set; }
+        public string? AuthorID { get; set; }
+        public string? CategoryID { get; set; }
+        public string? Highlighted { get; set; }
         public string? NewsStatus { get; set; }
         public string? Islive { get; set; }
         public List<GraphData>? GraphSeries { get; set; }

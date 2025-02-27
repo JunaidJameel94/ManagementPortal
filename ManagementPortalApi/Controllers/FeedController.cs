@@ -12,6 +12,7 @@ using System.Data;
 using System.Net;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace ManagementPortalApi.Controllers
@@ -371,8 +372,6 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-
-
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
         public IActionResult GetAllNewsTagEachNews(string FeedID)
@@ -401,8 +400,6 @@ namespace ManagementPortalApi.Controllers
             }
             return Ok(dt);
         }
-
-
 
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
@@ -444,7 +441,6 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
         public IActionResult GetAllNewsKeywordEachNews(string FeedID)
@@ -474,7 +470,6 @@ namespace ManagementPortalApi.Controllers
             return Ok(dt);
         }
 
-
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
         public IActionResult Get_AllNews_Tags()
@@ -501,8 +496,6 @@ namespace ManagementPortalApi.Controllers
             }
             return Ok(dt);
         }
-
-
 
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
@@ -531,9 +524,6 @@ namespace ManagementPortalApi.Controllers
             return Ok(dt);
         }
 
-
-
-
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
         public IActionResult Get_AllNews_MetaKeyword()
@@ -560,8 +550,6 @@ namespace ManagementPortalApi.Controllers
             }
             return Ok(dt);
         }
-
-
         #endregion
 
         #region Save Collection Name
@@ -1520,20 +1508,47 @@ namespace ManagementPortalApi.Controllers
 
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
-        public IActionResult Get_News_Detail()
+        public IActionResult Get_News_DetailForMGEditor()
         {
             DataTable dt = new DataTable();
             try
             {
-                dt = _DAL.GetData("sp_select_newscreations", null, _DAL.CSManagementPortalDatabase);
+                dt = _DAL.GetData("sp_select_newscreationsforEditor", null, _DAL.CSManagementPortalDatabase);
 
                 if (dt != null && dt.Rows.Count > 0)
                 {
-                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get + "sp_select_newscreations");
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get + "sp_select_newscreationsforEditor");
                 }
                 else
                 {
-                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get2 + "sp_select_newscreations");
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get2 + "sp_select_newscreationsforEditor");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{0} {1} {2}", "FeedController", MethodBase.GetCurrentMethod().Name, ex.Message);
+                SystemActivityLog(ActivityLog.ActivityID_Error, MethodBase.GetCurrentMethod().Name + " " + ex.Message);
+                return BadRequest("Something Went Wrong Please Contact Your Sysmtem Adminsitrator");
+            }
+            return Ok(dt);
+        }
+
+        [RateLimitMiddleware(100, 5)]
+        [HttpGet]
+        public IActionResult Get_News_DetailForMGPublisher()
+        {
+            DataTable dt = new DataTable();
+            try
+            {
+                dt = _DAL.GetData("sp_select_newscreationsforPublisher", null, _DAL.CSManagementPortalDatabase);
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get + "sp_select_newscreationsforPublisher");
+                }
+                else
+                {
+                    SystemActivityLog(ActivityLog.ActivityID_Get, ActivityLog.ActivityDetails_Get2 + "sp_select_newscreationsforPublisher");
                 }
             }
             catch (Exception ex)
@@ -1561,6 +1576,9 @@ namespace ManagementPortalApi.Controllers
                 newsParams.Add("TemplateID-INT", news.TemplateID);
                 newsParams.Add("NewsStatus-INT", news.NewsStatus);
                 newsParams.Add("Islive-BIT", news.Islive);
+                newsParams.Add("AuthorID-INT", news.AuthorID);
+                newsParams.Add("CategoryID-INT", news.CategoryID);
+                newsParams.Add("Highlighted-BIT", news.Highlighted);
                 var newsResult = _DAL.GetData("sp_insert_singlenews", newsParams, _DAL.CSManagementPortalDatabase);
                 if (newsResult.Rows.Count > 0)
                 {
@@ -1719,7 +1737,10 @@ namespace ManagementPortalApi.Controllers
                 newsParams.Add("UserID-INT", news.UserID);
                 newsParams.Add("TemplateID-INT", news.TemplateID);
                 newsParams.Add("NewsStatus-INT", news.NewsStatus);
+                newsParams.Add("AuthorID-INT", news.AuthorID);
+                newsParams.Add("CategoryID-INT", news.CategoryID);
                 newsParams.Add("Islive-BIT", news.Islive);
+                newsParams.Add("Highlighted-BIT", news.Highlighted);
 
                 var newsResult = _DAL.GetData("sp_insert_singlenews", newsParams, _DAL.CSManagementPortalDatabase);
                 if (newsResult.Rows.Count > 0)
@@ -1802,6 +1823,10 @@ namespace ManagementPortalApi.Controllers
                             {
                                 foreach (var cellData in table.data)
                                 {
+                                    if (cellData.isheader == "1" && cellData.cellcontent == table.tableName)
+                                    {
+                                        continue; // Skip table name as header
+                                    }
                                     NameValueCollection tableDataParams = new NameValueCollection();
                                     tableDataParams.Add("TableID-INT", tableId.ToString());
                                     tableDataParams.Add("RowNumber-INT", cellData.rownumber ?? "");
@@ -1878,7 +1903,6 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
         public IActionResult MGUpdateMultipleNews([FromBody] NewsMultiple news)
@@ -1890,16 +1914,17 @@ namespace ManagementPortalApi.Controllers
                 {
                     return BadRequest("UserID is required.");
                 }
-
                 // Step 1: Update news record
                 NameValueCollection newsParams = new NameValueCollection();
                 newsParams.Add("NewsID-INT", news.NewsID);
                 newsParams.Add("UserID-INT", news.UserID);
                 newsParams.Add("TemplateID-INT", news.TemplateID);
                 newsParams.Add("NewsStatus-INT", news.NewsStatus);
-                newsParams.Add("IsLive-BIT", news.Islive);
+                newsParams.Add("AuthorID-INT", news.AuthorID);
+                newsParams.Add("CategoryID-INT", news.CategoryID);
+                newsParams.Add("Islive-BIT", news.Islive);
+                newsParams.Add("Highlighted-BIT", news.Highlighted);
                 var newsResult = _DAL.InsertData("sp_update_singlenews", newsParams, _DAL.CSManagementPortalDatabase);
-
                 // Step 2: Update tags
                 foreach (var tagid in news.TagID)
                 {
@@ -1908,7 +1933,6 @@ namespace ManagementPortalApi.Controllers
                     tagParams.Add("NewsID-INT", news.NewsID);
                     _DAL.InsertData("sp_insert_newstagsmapping", tagParams, _DAL.CSManagementPortalDatabase);
                 }
-
                 // Step 3: Update slugs
                 foreach (var slugid in news.SlugID)
                 {
@@ -1971,8 +1995,6 @@ namespace ManagementPortalApi.Controllers
             return result ? Ok(result) : BadRequest(result);
         }
 
-
-
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
         public IActionResult Save_MultipleNews_Content([FromBody] List<NewsContents> newsContents)
@@ -1980,11 +2002,9 @@ namespace ManagementPortalApi.Controllers
             bool result = false;
             try
             {
-
-                
-
                 ClaimsPrincipal claimsPrincipal = HttpContext.User;
                 var UserID = (from c in claimsPrincipal.Claims where c.Type == "UserID" select c.Value).FirstOrDefault();
+                bool linkcompleted = false;
                 foreach (var newsContent in newsContents)
                 {
                     NameValueCollection nv = new NameValueCollection();
@@ -1993,6 +2013,19 @@ namespace ManagementPortalApi.Controllers
                     nv.Add("NewsContent-NVARCHAR", HttpUtility.HtmlEncode(newsContent.NewsContent));
 
                     result = _DAL.InsertData("sp_insert_singlenewscontent", nv, _DAL.CSManagementPortalDatabase);
+
+                    string link = "";
+     
+                    if (newsContent.FormID == "1" && linkcompleted == false)
+                    {
+                        nv.Clear();
+                        link = Regex.Replace(newsContent.NewsContent.Replace(" ", "-"), "[^a-zA-Z0-9-]", "");
+                        nv.Add("NewsID-INT", HttpUtility.HtmlEncode(newsContent.NewsID));
+                        nv.Add("NewsLink-NVARCHAR", HttpUtility.HtmlEncode(link) + "-" + newsContent.NewsID);
+                        result = _DAL.InsertData("sp_update_link_news", nv, _DAL.CSManagementPortalDatabase);
+                        linkcompleted = true;
+                    }
+
                     if (result)
                     {
                         SystemActivityLog(ActivityLog.ActivityID_Insert, ActivityLog.ActivityDetails_Insert + "sp_insert_singlenewscontent");
@@ -2013,7 +2046,6 @@ namespace ManagementPortalApi.Controllers
 
             return result ? Ok(result) : BadRequest(result);
         }
-
 
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
@@ -2031,8 +2063,19 @@ namespace ManagementPortalApi.Controllers
                     nv.Add("NewsID-INT", HttpUtility.HtmlEncode(newsContent.NewsID));
                     nv.Add("FormID-INT", newsContent.FormID);
                     nv.Add("NewsContent-NVARCHAR", HttpUtility.HtmlEncode(newsContent.NewsContent));
-
                     result = _DAL.InsertData("sp_insert_singlenewscontent", nv, _DAL.CSManagementPortalDatabase);
+
+                    string link = "";
+                    if (newsContent.FormID == "1")
+                    {
+                        
+                        nv.Clear();
+                        link = Regex.Replace(newsContent.NewsContent.Replace(" ", "-"), "[^a-zA-Z0-9-]", "");
+                        nv.Add("NewsID-INT", HttpUtility.HtmlEncode(newsContent.NewsID));
+                        nv.Add("NewsLink-NVARCHAR", HttpUtility.HtmlEncode(link) + "-" + newsContent.NewsID);
+                        result = _DAL.InsertData("sp_update_link_news", nv, _DAL.CSManagementPortalDatabase);
+                    }
+
                     if (result)
                     {
                         SystemActivityLog(ActivityLog.ActivityID_Insert, ActivityLog.ActivityDetails_Insert + "sp_insert_singlenewscontent");
@@ -2053,6 +2096,7 @@ namespace ManagementPortalApi.Controllers
 
             return result ? Ok(result) : BadRequest(result);
         }
+
 
 
         [RateLimitMiddleware(100, 5)]
@@ -2073,7 +2117,10 @@ namespace ManagementPortalApi.Controllers
                 newsParams.Add("UserID-INT", news.UserID);
                 newsParams.Add("TemplateID-INT", news.TemplateID);
                 newsParams.Add("NewsStatus-INT", news.NewsStatus);
-                newsParams.Add("IsLive-BIT", news.Islive);
+                newsParams.Add("AuthorID-INT", news.AuthorID);
+                newsParams.Add("CategoryID-INT", news.CategoryID);
+                newsParams.Add("Islive-BIT", news.Islive);
+                newsParams.Add("Highlighted-BIT", news.Highlighted);
                 var newsResult = _DAL.InsertData("sp_update_singlenews", newsParams, _DAL.CSManagementPortalDatabase);
 
                 // Step 2: Update tags
@@ -2230,6 +2277,10 @@ namespace ManagementPortalApi.Controllers
                         {
                             foreach (var cellData in table.data)
                             {
+                                if (cellData.isheader == "1" && cellData.cellcontent == table.tableName)
+                                {
+                                    continue; // Skip table name as header
+                                }
                                 NameValueCollection tableDataParams = new NameValueCollection();
                                 tableDataParams.Add("TableID-INT", tableId.ToString());
                                 tableDataParams.Add("RowNumber-INT", cellData.rownumber ?? "");
@@ -2353,7 +2404,6 @@ namespace ManagementPortalApi.Controllers
             return Ok(Result);
         }
 
-
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
         public IActionResult DeleteMultipleNewsGraph([FromBody] DeleteFromDB deleteFromDB_)
@@ -2387,8 +2437,6 @@ namespace ManagementPortalApi.Controllers
 
             return Ok(Result);
         }
-
-
 
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
@@ -2429,8 +2477,6 @@ namespace ManagementPortalApi.Controllers
 
             return result ? Ok(result) : BadRequest(result);
         }
-
-
 
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
@@ -2983,7 +3029,6 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-
         [HttpPost]
         public async Task<IActionResult> GenerateImage([FromBody] Dictionary<string, string> requestData)
         {
@@ -3037,13 +3082,6 @@ namespace ManagementPortalApi.Controllers
                 return StatusCode(500, $"Error: {ex.Message}");
             }
         }
-
-
-
-
-
-
-
 
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
@@ -3166,7 +3204,6 @@ namespace ManagementPortalApi.Controllers
             return Ok(dt);
         }
 
-
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
         public IActionResult SaveImageForResulation([FromBody] ImageUploadRequest request)
@@ -3204,7 +3241,6 @@ namespace ManagementPortalApi.Controllers
             }
         }
 
-
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
         public IActionResult GetImages()
@@ -3226,7 +3262,6 @@ namespace ManagementPortalApi.Controllers
                 return StatusCode(500, new { success = false, message = "Error fetching images: " + ex.Message });
             }
         }
-
 
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
@@ -3264,7 +3299,6 @@ namespace ManagementPortalApi.Controllers
             return Ok(Result);
         }
 
-
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
         public IActionResult GetRisizeNewsImage(string DivID)
@@ -3295,7 +3329,6 @@ namespace ManagementPortalApi.Controllers
             }
             return Ok(dt);
         }
-
 
         [RateLimitMiddleware(100, 5)]
         [HttpGet]
@@ -3330,8 +3363,6 @@ namespace ManagementPortalApi.Controllers
             return Ok(dt);
         }
 
-
-
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
         public IActionResult CreaterSendToEditor([FromBody] DeleteNewsData deleteNewsData)
@@ -3364,8 +3395,6 @@ namespace ManagementPortalApi.Controllers
 
             return Ok(Result);
         }
-
-
 
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
@@ -3467,7 +3496,6 @@ namespace ManagementPortalApi.Controllers
             return Ok(Result);
         }
 
-
         [RateLimitMiddleware(100, 5)]
         [HttpPost]
         public IActionResult PublisherNewsLive([FromBody] DeleteNewsData deleteNewsData)
@@ -3539,9 +3567,9 @@ namespace ManagementPortalApi.Controllers
                     case "4": // RSS 2.0
                         response = _rssFeedService.GenerateNews_RSS2(dt);
                         return Content(response, "application/rss+xml");
-                    case "5": // JSON
-                        response = _rssFeedService.GenerateNews_JSON(dt);
-                        return Content(response, "application/json");
+                    //case "5": // JSON
+                    //    response = _rssFeedService.GenerateNews_JSON(dt);
+                    //    return Content(response, "application/json");
                     case "6": // CUSTOME
                         response = _rssFeedService.GenerateNews_CustomText(dt);
                         return Content(response, "application/json");
@@ -3621,15 +3649,15 @@ namespace ManagementPortalApi.Controllers
                             response += _rssFeedService.GenerateNews_RSS2(filteredData);
                         }
                         return Content(response, "application/rss+xml");
-                    case "JSON": // JSON
-                        for (int i = 0; i < length; i++)
-                        {
-                            c = i;
-                            filteredData = dt.AsEnumerable().Where(row => row.Field<long>("RNO") == c + 1).CopyToDataTable();
+                    //case "JSON": // JSON
+                    //    for (int i = 0; i < length; i++)
+                    //    {
+                    //        c = i;
+                    //        filteredData = dt.AsEnumerable().Where(row => row.Field<long>("RNO") == c + 1).CopyToDataTable();
 
-                            response += _rssFeedService.GenerateNews_JSON(filteredData);
-                        }
-                        return Content(response, "application/json");
+                    //        response += _rssFeedService.GenerateNews_JSON(filteredData);
+                    //    }
+                    //    return Content(response, "application/json");
                     case "Custome": // CUSTOME
                         for (int i = 0; i < length; i++)
                         {
@@ -3715,15 +3743,15 @@ namespace ManagementPortalApi.Controllers
                             response += _rssFeedService.GenerateNews_RSS2(filteredData);
                         }
                         return Content(response, "application/rss+xml");
-                    case "JSON": // JSON
-                        for (int i = 0; i < length; i++)
-                        {
-                            c = i;
-                            filteredData = dt.AsEnumerable().Where(row => row.Field<long>("RNO") == c + 1).CopyToDataTable();
+                    //case "JSON": // JSON
+                    //    for (int i = 0; i < length; i++)
+                    //    {
+                    //        c = i;
+                    //        filteredData = dt.AsEnumerable().Where(row => row.Field<long>("RNO") == c + 1).CopyToDataTable();
 
-                            response += _rssFeedService.GenerateNews_JSON(filteredData);
-                        }
-                        return Content(response, "application/json");
+                    //        response += _rssFeedService.GenerateNews_JSON(filteredData);
+                    //    }
+                    //    return Content(response, "application/json");
                     case "Custome": // CUSTOME
                         for (int i = 0; i < length; i++)
                         {
@@ -3745,7 +3773,6 @@ namespace ManagementPortalApi.Controllers
             return Ok(dt);
         }
         #endregion
-
 
         [HttpGet] 
         public IActionResult GetRSSFeedByExternal(string FormatID, string TopN)
@@ -3810,15 +3837,15 @@ namespace ManagementPortalApi.Controllers
                             response += _rssFeedService.GenerateNews_RSS2(filteredData);
                         }
                         return Content(response, "application/rss+xml");
-                    case "JSON": // JSON
-                        for (int i = 0; i < length; i++)
-                        {
-                            c = i;
-                            filteredData = dt.AsEnumerable().Where(row => row.Field<long>("RNO") == c + 1).CopyToDataTable();
+                    //case "JSON": // JSON
+                    //    for (int i = 0; i < length; i++)
+                    //    {
+                    //        c = i;
+                    //        filteredData = dt.AsEnumerable().Where(row => row.Field<long>("RNO") == c + 1).CopyToDataTable();
 
-                            response += _rssFeedService.GenerateNews_JSON(filteredData);
-                        }
-                        return Content(response, "application/json");
+                    //        response += _rssFeedService.GenerateNews_JSON(filteredData);
+                    //    }
+                    //    return Content(response, "application/json");
                     case "Custome": // CUSTOME
                         for (int i = 0; i < length; i++)
                         {
@@ -3839,9 +3866,6 @@ namespace ManagementPortalApi.Controllers
             }
             return Ok(dt);
         }
-
-
-
 
         #region Single News
         [RateLimitMiddleware(100, 5)]
@@ -3873,17 +3897,14 @@ namespace ManagementPortalApi.Controllers
 
         }
         #endregion
-
     }
     #region Classes
-
     public class ImageUploadRequest
     {
         public string? Image { get; set; }
         public string? Resolution { get; set; }
         public string? ImageName { get; set; }
     }
-
     public class FeedFiltration
     {
         public string? ALL { get; set; }
@@ -3892,20 +3913,17 @@ namespace ManagementPortalApi.Controllers
         public string? PICTURE { get; set; }
         public string? AUDIOP { get; set; }
     }
-
     public class CollectionName
     {
         public string? Collection_id { get; set; }
         public string? Collection_name { get; set; }
         public string? UserID { get; set; }
     }
-
     public class CollectionFeeds
     {
         public string? CollectionID { get; set; }
         public string? FeedID { get; set; }
     }
-
     public class Planning
     {
         public string? planning_id { get; set; }
@@ -3918,12 +3936,10 @@ namespace ManagementPortalApi.Controllers
         public string? UserID { get; set; }
         public string? PlanningTime { get; set; }
     }
-
     public class TemplateBoxType
     {
         public string? TypeName { get; set; }
     }
-
     public class DeleteNewsData
     {
         public string? FeedID { get; set; }
@@ -3956,8 +3972,6 @@ namespace ManagementPortalApi.Controllers
         public string? Inline_Style { get; set; }
         public string? chartbgseries { get; set; }
     }
-
-
     #region Single News Modal
     public class News
     {
@@ -3966,6 +3980,9 @@ namespace ManagementPortalApi.Controllers
         public string? TemplateID { get; set; }
         public List<string>? TagID { get; set; }
         public List<string>? SlugID { get; set; }
+        public string? AuthorID { get; set; }
+        public string? CategoryID { get; set; }
+        public string? Highlighted { get; set; }
         public string? NewsStatus { get; set; }
         public string? Islive { get; set; }
         // Graph-related properties
@@ -4008,6 +4025,9 @@ namespace ManagementPortalApi.Controllers
         public string? TemplateID { get; set; }
         public List<string>? TagID { get; set; }
         public List<string>? SlugID { get; set; }
+        public string? AuthorID { get; set; }
+        public string? CategoryID { get; set; }
+        public string? Highlighted { get; set; }
         public string? NewsStatus { get; set; }
         public string? Islive { get; set; }
         public List<GraphData>? GraphSeries { get; set; }
@@ -4045,18 +4065,12 @@ namespace ManagementPortalApi.Controllers
         public string? isheader { get; set; }
     }
     #endregion
-
-
-
-
-
     public class NewsCategory
     {
         public string? N_catid { get; set; }
         public string? CategoryName { get; set; }
         public string? Createdby { get; set; }
     }
-
     public class SaveNewsTemplate
     {
         public string? STID { get; set; }
@@ -4069,8 +4083,6 @@ namespace ManagementPortalApi.Controllers
         public string? UpdateBy { get; set; }
         public string? UpdateDate { get; set; }
     }
-
-
     public class NewsContents
     {
         public string? ContentID { get; set; }
@@ -4078,7 +4090,6 @@ namespace ManagementPortalApi.Controllers
         public string? FormID { get; set; }
         public string? NewsContent { get; set; }
     }
-
     public class RisizeNewsImage
     {
         public string? RisizeImagePath { get; set; }
@@ -4087,25 +4098,20 @@ namespace ManagementPortalApi.Controllers
         public string? UserID { get; set; }
         public string? CollectionID { get; set; }
     }
-
     public class NewsMetaTags
     {
         public string? TagName { get; set; }
         public string? FeedID { get; set; }
     }
-
     public class NewsMetaTagsNews
     {
         public string? TagName { get; set; }
         public string? NewsID { get; set; }
     }
-
     public class NewsMetaKeywords
     {
         public string? MetaKeyword { get; set; }
         public string? FeedID { get; set; }
     }
-
-
     #endregion
 }

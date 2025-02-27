@@ -22,13 +22,26 @@ namespace ManagementPortalApi.Models
             _DAL = DAL;
             _env = env;
         }
-        
+
+        //public Task StartAsync(CancellationToken cancellationToken)
+        //{
+        //    StartConnection(17);
+        //    _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+        //    return Task.CompletedTask;
+        //}
+
         public Task StartAsync(CancellationToken cancellationToken)
         {
             StartConnection(17);
-            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
+
+            // Environment variable se interval lena
+            int intervalMinutes = int.TryParse(Environment.GetEnvironmentVariable("TIMER_INTERVAL_FTPRSSFeed"), out int minutes) ? minutes : 5;
+
+            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromMinutes(intervalMinutes));
+
             return Task.CompletedTask;
         }
+
 
         private void StartConnection(int sourceID)
         {

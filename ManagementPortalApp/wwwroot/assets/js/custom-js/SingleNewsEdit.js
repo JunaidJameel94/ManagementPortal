@@ -25,6 +25,8 @@ $(document).ready(function () {
     GetCollectionName();
     SelectNewsslugsDropdown();
     SelectNewsTagDropdown();
+    SelectAuthorDropdown();
+    SelectCategoryDropdown();
     GetGraphType();
     MakeGraph();
     MakeTable();
@@ -188,13 +190,6 @@ document.addEventListener('DOMContentLoaded', function () {
             $('.add-box').removeClass('d-none');
 
         }
-        
-
-        
-
-        
-
-
     }
     document.getElementById('AddGraph').addEventListener('click', function (event) {
         const target = event.target;
@@ -312,6 +307,53 @@ function SelectNewsTagDropdown() {
         }
     });
 }
+
+function SelectAuthorDropdown() {
+    new APICALL(GetGlobalURL('Base', 'GetALLAuthor'), 'GET', '', true).FETCH((result, error) => {
+        if (result) {
+            if (result.data != null) {
+                $('#AuthorName').append('<option hidden="true">Select Author</option>');
+                $.each(result.data, function (i, option) {
+                    $('#AuthorName').append(
+                        '<option value="' + option.id + '">' + option.authorname + '</option>'
+                    );
+                });
+            }
+        }
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error...',
+                text: error.data.responseText,
+                footer: ''
+            });
+        }
+    });
+}
+
+function SelectCategoryDropdown() {
+    new APICALL(GetGlobalURL('Base', 'GetALLCategory'), 'GET', '', true).FETCH((result, error) => {
+        if (result) {
+            if (result.data != null) {
+                $('#CategoryName').append('<option hidden="true">Select Category</option>');
+                $.each(result.data, function (i, option) {
+                    $('#CategoryName').append(
+                        '<option value="' + option.cat_id + '">' + option.category_name + '</option>'
+                    );
+                });
+            }
+        }
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error...',
+                text: error.data.responseText,
+                footer: ''
+            });
+        }
+    });
+}
+
 function GetCollectionName() {
     UTILITY.CheckSession((data_) => {
         if (data_) {
@@ -401,8 +443,8 @@ function fetchCollectionData(collectionId, containerId) {
                 const content = $(this).data("content");
                 //let image = '../' + $(this).data("image");
                 let image = $(this).data("image");
-                const viewurl = GetViewURL();
-                var newimage = viewurl + image;
+                //const viewurl = GetViewURL();
+                //var newimage = viewurl + image;
                 // Set values for the form fields
                 $("#addtitle").val(title);
                 $("#adddescription").val(description);
@@ -416,7 +458,7 @@ function fetchCollectionData(collectionId, containerId) {
                 const title = $(this).data("title");
                 const description = $(this).data("description");
                 const content = $(this).data("content");
-                let image = '../' + $(this).data("image");
+                let image = $(this).data("image");
 
                 $('.collectionheading').text(title);
                 $('.collectiondescription').text(description);
@@ -841,13 +883,18 @@ function GetNewsDetail(GlobalNewsID) {
                 $('#summernote').summernote('code', data.newscontent || '');
                 $('#ChartType').val(data.GraphTypeID).trigger('change');
                 $('#graphTitle').val(data.GraphTitle || '');
+                $('#AuthorName').val(data.authorid || '');
+                $('#CategoryName').val(data.categoryid || '');
+                $('#chkHighlighted').prop('checked', data.highlighted == 1);
                 $('#graphSubTitle').val(data.GraphSubTitle || '');
                 $('#TableName').val(data.TableName || '');
                 $('#TableRows').val(data.RowCounts || '');
                 $('#TableColumns').val(data.ColCounts || '');
+
+
                 const dropZoneElement = document.querySelector(".drop-zone");
                 if (dropZoneElement) {
-                    updateThumbnailFromPath(dropZoneElement, data.Newsimage || '');
+                    updateThumbnailFromPath(dropZoneElement, '../images/' + data.Newsimage || '');
                 } else {
                     console.warn("Drop zone element not found.");
                 }
@@ -991,6 +1038,9 @@ function UpdateSingleNews() {
     var TemplateID = 1;
     var TagName = $('#TagName').val() ? $('#TagName').val() : '';
     var SlugName = $('#SlugName').val() ? $('#SlugName').val() : '';
+    var CategoryName = $('#CategoryName').val() ? $('#CategoryName').val() : '';
+    var AuthorName = $('#AuthorName').val() ? $('#AuthorName').val() : '';
+    var highlighed = $("#chkHighlighted").is(":checked") ? 1 : 0;
     var NewsStatus = 0;
     var Islive = 0;
 
@@ -1004,6 +1054,9 @@ function UpdateSingleNews() {
             TemplateID: TemplateID,
             TagID: TagName,
             SlugID: SlugName,
+            Highlighted: highlighed,
+            AuthorID: AuthorName,
+            CategoryID: CategoryName,
             NewsStatus: NewsStatus,
             Islive: Islive
         });
@@ -1044,6 +1097,10 @@ function UpdateNewsContent() {
         var value = element.val();
         if (element.prop('tagName').toLowerCase() === 'img') {
             value = element.attr('src');
+            // Sirf filename extract karne ke liye
+            if (value.includes('/')) {
+                value = value.split('/').pop();
+            }
         }
 
         var contentData = {

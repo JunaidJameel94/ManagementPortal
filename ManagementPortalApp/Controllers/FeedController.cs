@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ManagementPortalApp.Utility;
 using Microsoft.AspNetCore.Authorization;
-using ManagementPortalApp.Utility;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ManagementPortalApp.Controllers
 {

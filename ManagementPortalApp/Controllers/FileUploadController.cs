@@ -14,16 +14,18 @@ namespace ManagementPortalApp.Controllers
     public class FileUploadController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
         private readonly Sessions _sessions;
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<FileUploadController> _logger;
 
-        public FileUploadController(Sessions sessions, IWebHostEnvironment webHostEnvironment, IConfiguration configuration, ILogger<FileUploadController> logger)
+        public FileUploadController(Sessions sessions, IWebHostEnvironment webHostEnvironment, IConfiguration configuration, ILogger<FileUploadController> logger, IWebHostEnvironment env)
         {
             _sessions = sessions;
             _environment = webHostEnvironment;
             _configuration = configuration;
             _logger = logger;
+            _env = env;
         }
 
         [TypeFilter(typeof(AllowedExtensionsAttribute))]
@@ -129,7 +131,8 @@ namespace ManagementPortalApp.Controllers
                         fname_partial = DateTime.Now.Millisecond.ToString() + '_' + milliseconds + FileExtension;
                         //  string path = Path.Combine(this._environment.WebRootPath, "LocalnewsImage", "NewsImage", fname_partial);
 
-                        string path = Path.Combine(this._environment.WebRootPath + "\\images\\", fname_partial);
+                        string path = Path.Combine(_env.WebRootPath, "images", fname_partial);
+                        //string path = Path.Combine(this._environment.WebRootPath + "\\images\\", fname_partial);
 
 
                         using (FileStream stream = new FileStream(path, FileMode.Create))
@@ -138,7 +141,7 @@ namespace ManagementPortalApp.Controllers
                         }
                     }
                 }
-                return Ok(@"/images/" + fname_partial);
+                return Ok(fname_partial);
             }
             catch (Exception ex)
             {
@@ -172,6 +175,7 @@ namespace ManagementPortalApp.Controllers
                         fname_partial = DateTime.Now.Millisecond.ToString() + '_' + milliseconds + FileExtension;
 
                         // Save original image in "images" folder
+                        //string defaultPath = Path.Combine(_env.WebRootPath, "images",fname_partial);
                         string defaultPath = Path.Combine(this._environment.WebRootPath + "\\images\\", fname_partial);
                         using (var image = SixLabors.ImageSharp.Image.Load(doc.file.OpenReadStream()))
                         {
@@ -185,7 +189,7 @@ namespace ManagementPortalApp.Controllers
 
                         return Ok(new
                         {
-                            defaultImagePath = @"/images/" + fname_partial,
+                            defaultImagePath =  fname_partial,
                             mobileImagePath = @"/mobile/" + fname,
                             desktopImagePath = @"/desktop/" + fname,
                             socialMediaImagePath = @"/socialmedia/" + fname
@@ -199,7 +203,6 @@ namespace ManagementPortalApp.Controllers
                 return BadRequest("Exception: " + ex.Message);
             }
         }
-
 
         private void ResizeAndSaveImage(IFormFile file, string folderName, Size newSize, string originalFileName)
         {
@@ -250,6 +253,30 @@ namespace ManagementPortalApp.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CropSaveFileUpload([FromForm] IFormFile croppedImage)
+        {
+            if (croppedImage == null || croppedImage.Length == 0)
+            {
+                return BadRequest("No image uploaded.");
+            }
+
+            string uploadsFolder = Path.Combine(_env.WebRootPath, "images");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            string fileName = $"cropped_{Guid.NewGuid()}.jpg";
+            string filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await croppedImage.CopyToAsync(stream);
+            }
+
+            return Ok(new { Message = "Image uploaded successfully!", FileName = fileName, FilePath = $"/images/{fileName}" });
+        }
 
         [HttpPost]
         public IActionResult UploadNewsimageThumnailimageAspectMultipleSelect([FromForm] NewsImageMultiple doc)
@@ -265,7 +292,7 @@ namespace ManagementPortalApp.Controllers
 
                 if (_sessions.SessionExist(UniqueKey, UserID))
                 {
-                    if (doc.file != null && doc.file.Count > 0)
+                    if (doc != null && doc.file != null && doc.file.Count > 0)
                     {
                         List<string> imagePaths = new List<string>();
 
@@ -281,7 +308,8 @@ namespace ManagementPortalApp.Controllers
                             fname_partial = DateTime.Now.Millisecond.ToString() + '_' + milliseconds + FileExtension;
 
                             // Save original image in "images" folder
-                            string defaultPath = Path.Combine(this._environment.WebRootPath + "\\images\\", fname_partial);
+                            string defaultPath = Path.Combine(_env.WebRootPath, "images", fname_partial);
+                            //string defaultPath = Path.Combine(this._environment.WebRootPath + "\\images\\", fname_partial);
                             using (var image = SixLabors.ImageSharp.Image.Load(file.OpenReadStream()))
                             {
                                 image.Save(defaultPath);
@@ -292,7 +320,7 @@ namespace ManagementPortalApp.Controllers
                             ResizeAndSaveImageMultiple(file, "desktop", new Size(1920, 1080), fname); // Desktop
                             ResizeAndSaveImageMultiple(file, "socialmedia", new Size(1080, 1080), fname); // Social Media
 
-                            imagePaths.Add(@"/images/" + fname_partial);
+                            imagePaths.Add(fname_partial);
                         }
 
                         return Ok(new

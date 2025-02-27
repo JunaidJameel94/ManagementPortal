@@ -432,6 +432,7 @@ function FetchAdUsers() {
             $('#ModalActiveDirectoryUsers').modal('show');
             $('#TblActiveDirectoryUsers').DataTable().clear().destroy();
             $('#TblActiveDirectoryUsers tbody').empty();
+            $('body').removeClass();
             if (result.data != null) {
                 AdUsers = result.data;
                 $.each(result.data, function (i, option) {

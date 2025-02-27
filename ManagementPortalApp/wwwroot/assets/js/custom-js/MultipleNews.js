@@ -6,11 +6,14 @@ $(document).ready(function () {
     GetCollectionName();
     SelectNewsslugsDropdown();
     SelectNewsTagDropdown();
+    SelectAuthorDropdown();
+    SelectCategoryDropdown();
     GetGraphType();
     initEventListenersForGraph();
     MakeTable();
     readAndDisplayCSVFile();
     readAndDisplayCSVFileForGraph();
+
     $('#summernote').summernote({
         height: 300, 
         maxHeight: 300, 
@@ -113,7 +116,7 @@ rightButton.addEventListener("click", () => {
 fileInput.addEventListener("change", () => {
     const files = Array.from(fileInput.files); 
     SaveNewsImage();
-    handleFiles(files);
+    //handleFiles(files);
 });
 
 dropzone.addEventListener("drop", (e) => {
@@ -128,7 +131,7 @@ function handleFiles(files) {
             previewDiv.classList.add("upimageone");
 
             const imgElement = document.createElement("img");
-            imgElement.src = '../' + file;
+            imgElement.src = '../images/' + file;
             imgElement.alt = "Preview";
             imgElement.classList.add("img-fluid");
             imgElement.setAttribute("formid", "4");  
@@ -389,7 +392,7 @@ function fetchCollectionData(collectionId, containerId) {
                 const title = $(this).data("title");
                 const description = $(this).data("description");
                 const content = $(this).data("content");
-                let image = $(this).data("image");
+                let image = '../' + $(this).data("image");
 
                 $('.collectionheading').text(title);
                 $('.collectiondescription').text(description);
@@ -458,6 +461,50 @@ function SelectNewsTagDropdown() {
             }
         } else {
             console.error("Failed to fetch data from the API:", error);
+        }
+    });
+}
+function SelectAuthorDropdown() {
+    new APICALL(GetGlobalURL('Base', 'GetALLAuthor'), 'GET', '', true).FETCH((result, error) => {
+        if (result) {
+            if (result.data != null) {
+                $('#AuthorName').append('<option hidden="true">Select Author</option>');
+                $.each(result.data, function (i, option) {
+                    $('#AuthorName').append(
+                        '<option value="' + option.id + '">' + option.authorname + '</option>'
+                    );
+                });
+            }
+        }
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error...',
+                text: error.data.responseText,
+                footer: ''
+            });
+        }
+    });
+}
+function SelectCategoryDropdown() {
+    new APICALL(GetGlobalURL('Base', 'GetALLCategory'), 'GET', '', true).FETCH((result, error) => {
+        if (result) {
+            if (result.data != null) {
+                $('#CategoryName').append('<option hidden="true">Select Category</option>');
+                $.each(result.data, function (i, option) {
+                    $('#CategoryName').append(
+                        '<option value="' + option.cat_id + '">' + option.category_name + '</option>'
+                    );
+                });
+            }
+        }
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error...',
+                text: error.data.responseText,
+                footer: ''
+            });
         }
     });
 }
@@ -757,7 +804,7 @@ function MakeTable() {
             alert('Please enter all the details!');
             return;
         }
-        var tableHTML = '<div class="table-responsive"><table class="table table-bordered table-striped data" formid="5">';
+        var tableHTML = '<div class="table-responsive"><table class="table table-bordered table-striped data">';
         tableHTML += '<thead><tr>';
         tableHTML += '<th colspan="' + tableColumns + '" contenteditable="true">' + tableName + '</th>';
         tableHTML += '</tr><tr>';
@@ -1026,6 +1073,15 @@ function SaveMultipleNews() {
     var TemplateID = 2;
     var TagName = $('#TagName').val() || '';
     var SlugName = $('#SlugName').val() || '';
+    var AuthorName = $('#AuthorName').val() ? $('#AuthorName').val() : '';
+    var CategoryName = $('#CategoryName').val() ? $('#CategoryName').val() : '';
+    var highlighed = $("#chkHighlighted").is(":checked") ? 1 : 0;
+
+    if (CategoryName == "") {
+        alert("Enter Category Fitrst");
+        return;
+    }
+
     var NewsStatus = 0;
     var Islive = 0;
 
@@ -1051,7 +1107,7 @@ function SaveMultipleNews() {
         var $table = $(table.content);
 
         // Process table header (thead)
-        $table.find('thead tr').each(function (rowIndex) {
+       $table.find('thead tr').each(function (rowIndex) {
             $(this).find('th').each(function (colIndex) {
                 var headerContent = $(this).text().trim(); // Ensure text content is captured
                 if (headerContent && headerContent !== table.name) { // Exclude table name
@@ -1097,6 +1153,9 @@ function SaveMultipleNews() {
         TemplateID: TemplateID,
         TagID: TagName,
         SlugID: SlugName,
+        AuthorID: AuthorName,
+        CategoryID: CategoryName,
+        Highlighted: highlighed,
         NewsStatus: NewsStatus.toString(),
         Islive: Islive.toString()
     };
@@ -1145,6 +1204,9 @@ function SaveNewsContent() {
         var value = element.val();
         if (element.prop('tagName').toLowerCase() === 'img') {
             value = element.attr('src');
+            if (value.includes('/')) {
+                value = value.split('/').pop();
+            }
         }
         var contentData = {
             NewsID: news_ids,

@@ -35,21 +35,29 @@ namespace ManagementPortalApp.Controllers
         {
             return View();
         }
-
         public IActionResult MasterSlugs()
         {
             return View();
         }
-
         public IActionResult ApiUserMaster()
         {
             return View();
         }
-
         public IActionResult ApiEndPoint()
         {
             return View();
         }
+
+        public IActionResult Author()
+        {
+            return View();
+        }
+
+        public IActionResult Category()
+        {
+            return View();
+        }
+
 
     }
 }

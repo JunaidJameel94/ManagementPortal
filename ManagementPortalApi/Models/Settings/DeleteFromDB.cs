@@ -5,6 +5,8 @@
         public string? UserID { get; set; }
         public string? newsID { get; set; }
         public string? ID { get; set; }
+        public string? AuthorID { get; set; }
+        public string? CategoryID { get; set; }
         public string? RoleID { get; set; }
         public string? TableID { get; set; }
         public string? GraphID { get; set; }

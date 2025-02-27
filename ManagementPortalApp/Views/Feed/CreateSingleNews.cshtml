@@ -8,6 +8,9 @@
 	<link href="~/assets/vendors/summernote/summernote-lite.min.css" rel="stylesheet" />
 	<link href="~/assets/vendors/select2/select2-theme.min.css" rel="stylesheet" />
 	<link href="~/assets/vendors/select2/select2.min.css" rel="stylesheet" />
+	<link href="~/assets/vendors/xlsx/cropper.min.css" rel="stylesheet" />
+
+	
 }
 @{
 	System.Security.Claims.ClaimsPrincipal claimsPrincipal = Context.User;
@@ -56,17 +59,24 @@
 							</div>
 						</form>
 						<div class="drop-zone text-center mx-auto">
+					
 							<span class="drop-zone__prompt">
 								<img src="~/assets/images/upload.png" id="imagepath" class="img-fluid w-25"> <br>
 								Drop file here or click to upload <br>
 								<small>(.png, .jpg, .gif, .webp )</small>
 							</span>
 							<input type="file" name="myFile" class="drop-zone__input">
-
 						</div>
+				
 					</div>
 
-
+					<div class="col-12">
+						<div class="crop-container">
+							
+						</div>
+						<button id="cropImage">Crop & Upload</button>
+					</div>
+					
 					<div class="col-12">
 						<div class="form-group ">
 							<label for="addTextImageGenerate" class="add-title">Text To Image Generator</label>
@@ -76,9 +86,7 @@
 							</div>
 						</div>
 					</div>
-
-
-
+					
 					<div class="col-12 my-3">
 						<div class="aitextimagegenerator">
 							<div class="form-group">
@@ -86,8 +94,8 @@
 								<textarea id="summernote" class="form-control data" formid="3" placeholder="Add Content"></textarea>
 							</div>
 						</div>
-						
 					</div>
+
 					<div class="col-12">
 						<div class="form-group">
 							<label for="addAiNews" class="add-title mb-1">Create AI News</label>
@@ -213,7 +221,6 @@
 										<div class="col-12">
 											<div class="add-box-form">
 												<div class="row">
-
 													<div class="col-12 d-flex align-items-center justify-content-between">
 														<h3>Table Settings</h3>
 														<button id="clearhtmltablefile" class="btn-sm btn btn-danger">Clear Table</button>
@@ -259,13 +266,12 @@
 										</div>
 									</div>
 								</form>
-
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-md-6 col-12">
+					<div class="col-md-3 col-12">
 						<div class="form-group">
 							<label for="slugs" class="add-title mb-1">Select Slugs</label>
 							<div class="custom-select-container">
@@ -275,7 +281,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-md-6 col-12">
+					<div class="col-md-3 col-12">
 						<div class="form-group">
 							<label for="TagsCategories" class="add-title mb-1">Tags / Categories</label>
 							<div class="custom-select-container">
@@ -285,6 +291,26 @@
 							</div>
 						</div>
 					</div>
+					<div class="col-md-3 col-12">
+						<div class="form-group">
+							<label for="AuthorName" class="add-title mb-1">Select Author</label>
+							<div class="custom-select-container">
+								<select class="form-control" id="AuthorName" name="AuthorName" >
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3 col-12">
+						<div class="form-group">
+							<label for="CategoryName" class="add-title mb-1">Select Category</label>
+							<div class="custom-select-container">
+								<select class="form-control" id="CategoryName" name="CategoryName">
+								</select>
+							</div>
+						</div>
+					</div>
+
 				</div>
 			</div>
 		</div>
@@ -306,14 +332,17 @@
 		</div>
 	</div>
 	<div class="row my-2">
-		<div class="col-12 ">
+		<div class="col-12">
 			<div class="actionbt-div">
-				<div class="d-flex justify-content-center">
+				<div class="d-flex justify-content-center align-items-center gap-2">
+					<input type="checkbox" id="chkHighlighted" name="highlighted">
+					<label for="chkHighlighted" class="mb-0">Highlighted</label>
 					<button type="button" id="btnSaveNews" class="btn btn-md btn-green">Save</button>
 				</div>
 			</div>
 		</div>
 	</div>
+
 </div>
 
 <!--MoDAL-->
@@ -358,6 +387,7 @@
 	<script src="~/assets/vendors/summernote/summernote-lite.min.js"></script>
 	<script src="~/assets/vendors/select2/select2.min.js"></script>
 	<script src="~/assets/vendors/fonts/feather.min.js"></script>
+	<script src="~/assets/vendors/xlsx/cropper.min.js"></script>
 	<script src="~/assets/vendors/highcharts/highcharts.js"></script>
 	<script src="~/assets/vendors/highcharts/highcharts-more.js"></script>
 	<script src="~/assets/vendors/highcharts/exporting.js"></script>

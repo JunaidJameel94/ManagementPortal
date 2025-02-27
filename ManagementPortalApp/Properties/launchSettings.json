@@ -12,6 +12,8 @@
         "https": {
             "commandName": "Project",
             "environmentVariables": {
+                "TIMER_INTERVAL_FTPRSSFeed": "5",
+                "RSS_FEED_INTERVAL": "15",
                 "AM_SALT_SIZE": "32",
                 "AM_KEY_SIZE": "64",
                 "AM_ITERATIONS": "15000",
@@ -33,11 +35,13 @@
                 "IMAGE_SAVE_RESULTION": "F:\\Faizan Work\\2024-10-19 Last Update News Project\\shuja\\Management Portal\\ManagementPortalApp\\wwwroot\\UserSaveImage",
                 "RssAPPImage": "F:\\Faizan Work\\2024-10-19 Last Update News Project\\shuja\\Management Portal\\ManagementPortalApp\\wwwroot\\images",
 
-           
 
 
-                //News MLG2 Envoirement 
+
+                //News MLG2 Envoirement
                 "sender": "Mettis Global News",
+                "Source": "Mettis Global News Source",
+                "credit": "Mettis Global Pvt Ltd",
                 "origin": "Mettis Global News Plat form",
                 "NewsMLG2Namespace": "http://www.iptc.org/std/nar/2006-10-01/",
                 "NewsMLG2Version": "2.0",
@@ -46,13 +50,22 @@
                 "NewsMLG1Namespace": "http://www.newsml.org/2003/08/newsml",
                 "NewsMLG1Version": "1.0",
                 "NewsMLG1NewsEnvelope": "NewsEnvelope",
+                "ProviderId": "Mettis Global Pvt Ltd",
+                "RevisionId": "1",
 
                 //Atom News Envoirement
                 "NewsAtomNamespace": "http://www.w3.org/2005/Atom",
                 "NewsAtomVersion": "1.0",
                 "NewsAtomNewsEnvelope": "NewsEnvelope",
                 "RSS2MettisLink": "https://mettisglobal.news/",
-                "MettisRSSDescription": "Latest news updates from Mettis Global News"
+                "MettisRSSDescription": "Latest news updates from Mettis Global News",
+
+                //RSS2
+                "channelTitle": "Mettis Global RSS Feed",
+                "channelLink": "https://www.mettisglobal.com",
+                "channelDescription": "Latest news updates from Mettis Global",
+                "language": "en-us",
+                "Rss2version": "2.0"
             },
             "launchBrowser": true,
             "dotnetRunMessages": true,

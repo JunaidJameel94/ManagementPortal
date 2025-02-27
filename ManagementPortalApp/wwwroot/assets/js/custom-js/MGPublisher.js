@@ -14,17 +14,17 @@ function GetNewsDetail() {
 
                         $.each(result.data, function (i, detail) {
                             var Sendtoeditor = (data_[0].AllowUpdate == true)
-                                ? '<button class="btn btn-success btn-sm sendtoeditor-btn  w-100"" data-id="' + detail.newsID + '"><i class="fas fa-check-circle"></i> Send Editor</button>'
+                                ? '<button class="btn btn-success btn-sm sendtoeditor-btn  w-100"" data-id="' + detail.newsid + '"><i class="fas fa-check-circle"></i> Send Editor</button>'
                                 : '';
                             var goingtolive = (data_[0].AllowUpdate == true)
-                                ? '<button class="btn btn-danger btn-sm NewsGoingToLive-btn  w-100"" data-id="' + detail.newsID + '"><i class="fas fa-check-circle"></i> Going To Live</button>'
+                                ? '<button class="btn btn-danger btn-sm NewsGoingToLive-btn  w-100"" data-id="' + detail.newsid + '"><i class="fas fa-check-circle"></i> Going To Live</button>'
                                 : '';
                             if (detail.NewsStatus == 2 && detail.isDeleted == 0) {
                                 var newsItem = `
                                 <div class="row align-items-center">
                                     <div class="col-md-2 col-12 text-center">
                                         <div class="newsimg-div">
-                                            <img src="${detail.Newsimage}" class="img-fluid rounded" alt="News Image">
+                                            <img src="../images/${detail.Newsimage}" class="img-fluid rounded" alt="News Image">
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-12">
@@ -50,7 +50,6 @@ function GetNewsDetail() {
                                     </div>`;
                                 $('#newsContainer').append(newsItem); 
                             }
-
                             else if (detail.NewsStatus == 3) {
                                 var newsItem = `
                                 <div class="row align-items-center">
@@ -96,6 +95,7 @@ function GetNewsDetail() {
         }
     });
 }
+
 function PublisherSendToEditor(newsID) {
     $('#submit-remarks').off('click').on('click', function () {
         var publisherRemarks = $('#publisher-remarks').val();
@@ -151,8 +151,6 @@ function NewsGoingToLive(newsID) {
         }
     });
 }
-
-
 function SearchNewsDetail() {
     UTILITY.CheckSession((data_) => {
         if (data_) {

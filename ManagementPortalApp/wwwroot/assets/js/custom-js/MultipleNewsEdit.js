@@ -10,6 +10,8 @@ $(document).ready(function () {
     GetGraphType();
     GetCollectionName();
     initEventListenersForGraph();
+    SelectAuthorDropdown();
+    SelectCategoryDropdown();
     MakeTable();
     readAndDisplayCSVFile();
     readAndDisplayCSVFileForGraph();
@@ -43,7 +45,6 @@ const uploadContainer = document.getElementById("uploadContainer");
 const navigationButtons = document.getElementById("navigationButtons");
 const leftButton = document.getElementById("leftButton");
 const rightButton = document.getElementById("rightButton");
-
 const maxVisible = 5;
 let currentIndex = 0;
 
@@ -96,29 +97,45 @@ rightButton.addEventListener("click", () => {
 fileInput.addEventListener("change", () => {
     const files = Array.from(fileInput.files);
     SaveNewsImage();
-    handleFiles(files);
+    //handleFiles(files);
 });
 
 dropzone.addEventListener("drop", (e) => {
     e.preventDefault();
     dropzone.classList.remove("dragover");
-    handleFiles(e.dataTransfer.files);
+    handleFiles(e.dataTransfer.files.name);
 });
 function handleFiles(files) {
-    console.log('Files to handle:', files); // Debug log
+    console.log('Files received:', files); // Debugging
 
-    // Ensure files are correctly extracted if they are objects with the `MultipleImage` property
-    const imageUrls = files.map(file => (file.MultipleImage ? file.MultipleImage : file));
+    // Ensure files is an array
+    if (!Array.isArray(files)) {
+        files = [files];
+    }
+
+    // Extract images properly
+    const imageUrls = files.map(file => {
+        if (file && typeof file === 'object' && file.MultipleImage) {
+            return file.MultipleImage; // Extract URL
+        } else if (typeof file === 'string') {
+            return file; // If it's already a URL, use it
+        } else {
+            console.warn('Invalid file format:', file);
+            return null;
+        }
+    }).filter(Boolean); // Remove null values
+
+    console.log('Extracted Image URLs:', imageUrls); // Debugging
 
     imageUrls.forEach((file) => {
         if (typeof file === "string") {
-            console.log('Handling image URL:', file); // Debug log
+            console.log('Handling image URL:', file);
 
             const previewDiv = document.createElement("div");
             previewDiv.classList.add("upimageone");
 
             const imgElement = document.createElement("img");
-            imgElement.src = '../' + file;
+            imgElement.src = '../images/' + file;
             imgElement.alt = "Preview";
             imgElement.classList.add("img-fluid");
             imgElement.setAttribute("formid", "4");
@@ -141,7 +158,7 @@ function handleFiles(files) {
             uploadContainer.appendChild(previewDiv);
             updateVisibility();
         } else {
-            console.warn('File is not a string:', file); // Debug non-URL cases
+            console.warn('File is not a string:', file);
         }
     });
 }
@@ -270,6 +287,9 @@ function GetNewsDetail(GlobalNewsID) {
                 //#region Single News Data Fetch
                 GraphID = data.GraphID;
                 TableID = data.TableID;
+                $('#AuthorName').val(data.authorid || '');
+                $('#CategoryName').val(data.categoryid || '');
+                $('#chkHighlighted').prop('checked', data.highlighted == 1);
                 //$('#addtitle').val(data.title || '');
                 let titlessss = [];
                 try {
@@ -295,7 +315,7 @@ function GetNewsDetail(GlobalNewsID) {
                 var MImages = [];
                 try {
                     if (data.ImageJson) {
-                        MImages = JSON.parse(data.ImageJson);
+                         MImages = JSON.parse(data.ImageJson);
                     }
                 } catch (e) {
                     console.error('Error parsing Image:', e);
@@ -652,6 +672,50 @@ function SelectNewsTagDropdown() {
         }
     });
 }
+function SelectAuthorDropdown() {
+    new APICALL(GetGlobalURL('Base', 'GetALLAuthor'), 'GET', '', true).FETCH((result, error) => {
+        if (result) {
+            if (result.data != null) {
+                $('#AuthorName').append('<option hidden="true">Select Author</option>');
+                $.each(result.data, function (i, option) {
+                    $('#AuthorName').append(
+                        '<option value="' + option.id + '">' + option.authorname + '</option>'
+                    );
+                });
+            }
+        }
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error...',
+                text: error.data.responseText,
+                footer: ''
+            });
+        }
+    });
+}
+function SelectCategoryDropdown() {
+    new APICALL(GetGlobalURL('Base', 'GetALLCategory'), 'GET', '', true).FETCH((result, error) => {
+        if (result) {
+            if (result.data != null) {
+                $('#CategoryName').append('<option hidden="true">Select Category</option>');
+                $.each(result.data, function (i, option) {
+                    $('#CategoryName').append(
+                        '<option value="' + option.cat_id + '">' + option.category_name + '</option>'
+                    );
+                });
+            }
+        }
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error...',
+                text: error.data.responseText,
+                footer: ''
+            });
+        }
+    });
+}
 function GetGraphType() {
     new APICALL(GetGlobalURL('Base', 'GetGraphTypeName'), 'GET', '', true).FETCH((result, error) => {
         if (result) {
@@ -761,7 +825,7 @@ function fetchCollectionData(collectionId, containerId) {
                 const description = $(this).data("description");
                 const content = $(this).data("content");
                 /*let image = '../' + $(this).data("image");*/
-                let image = $(this).data("image");
+                let image = '../' + $(this).data("image");
                 $("#titleone").val(title);
                 $("#addDescription").val(description);
                 $("#summernote").summernote("code", content);
@@ -854,15 +918,15 @@ function AI_NewsGenerated() {
     });
 }
 function initEventListenersForGraph() {
-    $('#addSeries').click(addSeriesRow);
-    $('#GenerateChart').click(generateChart);
-    $(document).on('click', '.remove-series', removeSeriesRow);
-    $(document).on('click', '.view-chart', viewChart);
-    $(document).on('click', '.delete-chart', deleteChart);
-    $(document).on('click', '.edit-chart', editChart);
+    $('#addSeries').off('click').on('click', addSeriesRow);
+    $('#GenerateChart').off('click').on('click', generateChart);
+    $(document).off('click', '.remove-series').on('click', '.remove-series', removeSeriesRow);
+    $(document).off('click', '.view-chart').on('click', '.view-chart', viewChart);
+    $(document).off('click', '.delete-chart').on('click', '.delete-chart', deleteChart);
+    $(document).off('click', '.edit-chart').on('click', '.edit-chart', editChart);
 }
 function addSeriesRow() {
-    let newRow = `<div class="row mt-3">
+    let newRow = `<div class="row mt-3 series-row">
         <div class="col-md-4 col-12 form-group">
             <input type="text" class="form-control series-name" placeholder="Series Name">
         </div>
@@ -873,7 +937,7 @@ function addSeriesRow() {
             <input type="text" class="form-control series-color" placeholder="Color (e.g., red)">
         </div>
         <div class="col-md-1 col-12 mt-auto text-end">
-            <button class="btn btn-sm add-button ms-auto remove-series"> <i class="feather-minus-square fs-2"></i></button>
+            <button class="btn btn-sm btn-danger remove-series">-</button>
         </div>
     </div>`;
     $('#rowsContainer').append(newRow);
@@ -882,22 +946,27 @@ function removeSeriesRow() {
     $(this).closest('.row').remove();
 }
 function generateChart() {
-    let charttypeid = $('#ChartType').val();
     let type = $('#ChartType option:selected').text();
     let title = $('#graphTitle').val();
     let subtitle = $('#graphSubTitle').val();
     let labelOrientation = $('#LabelOrientation').val();
     let series = getSeriesData();
+
+    if (series.length === 0) {
+        alert('Please add at least one series.');
+        return;
+    }
+
     let chartInfo = {
         id: chartID,
         type,
         title,
-        charttypeid,
         subtitle,
         labelOrientation,
         series,
         status: 'Active'
     };
+
     tbl_graph.push(chartInfo);
     addChartToTable(chartInfo);
     $('#MGGraphTable').removeClass('d-none');
@@ -905,10 +974,10 @@ function generateChart() {
 }
 function getSeriesData() {
     let series = [];
-    $('.series-name').each(function () {
-        let name = $(this).val();
-        let values = $(this).closest('.row').find('.series-values').val();
-        let color = $(this).closest('.row').find('.series-color').val();
+    $('.series-row').each(function () {
+        let name = $(this).find('.series-name').val().trim();
+        let values = $(this).find('.series-values').val().trim();
+        let color = $(this).find('.series-color').val().trim();
 
         if (name && values) {
             series.push({
@@ -921,22 +990,15 @@ function getSeriesData() {
     return series;
 }
 function addChartToTable(chartInfo) {
-    let hiddenSeries = JSON.stringify(chartInfo.series);
-    //let labelOrientation = chartInfo.labelOrientation || 'Default';
-
-
-    let charttypeid = chartInfo.charttypeid || 'Unknown';
-
     let newRow = `<tr data-id="${chartInfo.id}">
         <td>${chartInfo.id}</td>
-        <td data-type-id="${charttypeid}">${chartInfo.type}</td> <!-- Store the typeId in a data attribute -->
+        <td>${chartInfo.type}</td>
         <td>${chartInfo.title}</td>
         <td>${chartInfo.subtitle}</td>
-        
         <td class="d-flex justify-content-center">
-            <button class="btn btn-success-square edit-chart"><i class="feather feather-edit-3 fs-6"></i></button> &nbsp;
-            <button class="btn btn-info-square view-chart"><i class="feather feather-monitor fs-6"></i></button> &nbsp;
-            <button class="btn btn-danger-square delete-chart"><i class="feather feather-trash fs-6"></i></button>
+            <button class="btn btn-success edit-chart"><i class="feather feather-edit-3 fs-6"></i></button> &nbsp;
+            <button class="btn btn-info view-chart"><i class="feather feather-monitor fs-6"></i></button> &nbsp;
+            <button class="btn btn-danger delete-chart"><i class="feather feather-trash fs-6"></i></button>
         </td>
     </tr>`;
 
@@ -944,21 +1006,13 @@ function addChartToTable(chartInfo) {
 }
 function viewChart() {
     let id = $(this).closest('tr').data('id');
-    let seriesData = $(this).closest('tr').find('.series-data').text();
     let chart = tbl_graph.find(c => c.id === id);
-
-    if (seriesData) {
-        chart.series = JSON.parse(seriesData);
-    }
-
-    let labels = $('#LabelOrientation').val();
-    let categories = labels ? labels.split(',') : [];
 
     $('#chartContainer').empty();
 
     Highcharts.chart('chartContainer', {
         chart: {
-            type: chart.type
+            type: chart.type.toLowerCase()
         },
         title: {
             text: chart.title
@@ -967,14 +1021,14 @@ function viewChart() {
             text: chart.subtitle
         },
         xAxis: {
-            categories: categories
+            categories: chart.labelOrientation ? chart.labelOrientation.split(',') : []
         },
         yAxis: {
             title: {
                 text: 'Values'
             }
         },
-        series: chart.type === 'pie' ? [{
+        series: chart.type.toLowerCase() === 'pie' ? [{
             name: chart.title,
             data: chart.series.map(s => ({
                 name: s.name,
@@ -985,7 +1039,6 @@ function viewChart() {
     });
 
     $('#modalgraphshow').modal('show');
-    $('body').removeClass();
 }
 function deleteChart() {
     let id = $(this).closest('tr').data('id');
@@ -1002,15 +1055,15 @@ function editChart() {
     $('#rowsContainer').empty();
 
     chart.series.forEach(s => {
-        let newRow = `<div class="row mt-3">
+        let newRow = `<div class="row mt-3 series-row">
             <div class="col-md-4 col-12 form-group">
                 <input type="text" class="form-control series-name" value="${s.name}" placeholder="Series Name">
             </div>
             <div class="col-md-4 col-12 form-group">
-                <input type="text" class="form-control series-values" value="${s.data.join(',')}" placeholder="Comma-separated values (e.g., 10,20,30)">
+                <input type="text" class="form-control series-values" value="${s.data.join(',')}" placeholder="Comma-separated values">
             </div>
             <div class="col-md-3 col-12 form-group">
-                <input type="text" class="form-control series-color" value="${s.color || ''}" placeholder="Color (e.g., red)">
+                <input type="text" class="form-control series-color" value="${s.color || ''}" placeholder="Color">
             </div>
             <div class="col-md-1 col-12 mt-auto text-end">
                 <button class="btn btn-sm btn-danger remove-series">-</button>
@@ -1018,29 +1071,24 @@ function editChart() {
         </div>`;
         $('#rowsContainer').append(newRow);
     });
-    if ($('#rowsContainer').children('.row').length === chart.series.length) {
-        $('#rowsContainer').append(`
-            <div class="row mt-3">
-                <div class="col-12 text-end">
-                    <button class="btn btn-sm add-button ms-auto" type="button" id="addSeries">
-                        <i class="feather-plus-square fs-2"></i> Add Series
-                    </button>
-                </div>
-            </div>
-        `);
-    }
+
     $('#graphForm').removeClass('d-none');
     $('#MGGraphTable').addClass('d-none');
-    $('#GenerateChart').off('click').on('click', function () {
+
+$('#GenerateChart').unbind('click').click(function () {
         chart.title = $('#graphTitle').val();
         chart.subtitle = $('#graphSubTitle').val();
         chart.labelOrientation = $('#LabelOrientation').val();
         chart.series = getSeriesData();
+
+        // Remove old row and update table
         $(`#MGGraphList tbody tr[data-id="${chart.id}"]`).remove();
         addChartToTable(chart);
+
         $('#MGGraphTable').removeClass('d-none');
         $('#graphForm').addClass('d-none');
     });
+
     $(document).on('click', '#addSeries', addSeriesRow);
 }
 function MakeTable() {
@@ -1115,6 +1163,7 @@ function updateTableList() {
         $('#viewTableModal').modal('show');
         $('body').removeClass();
     });
+
     $('.deleteTable').click(function () {
         const index = $(this).data('index');
         tbl_tables.splice(index, 1);
@@ -1332,6 +1381,9 @@ function UpdateMultipleNews() {
     var TemplateID = 2;
     var TagName = $('#TagName').val() ? $('#TagName').val() : '';
     var SlugName = $('#SlugName').val() ? $('#SlugName').val() : '';
+    var CategoryName = $('#CategoryName').val() ? $('#CategoryName').val() : '';
+    var AuthorName = $('#AuthorName').val() ? $('#AuthorName').val() : '';
+    var highlighed = $("#chkHighlighted").is(":checked") ? 1 : 0;
     var NewsStatus = 0;
     var Islive = 0;
 
@@ -1345,6 +1397,9 @@ function UpdateMultipleNews() {
             TemplateID: TemplateID,
             TagID: TagName,
             SlugID: SlugName,
+            Highlighted: highlighed,
+            AuthorID: AuthorName,
+            CategoryID: CategoryName,
             NewsStatus: NewsStatus,
             Islive: Islive
         });
@@ -1385,6 +1440,9 @@ function UpdateNewsContent() {
         var value = element.val();
         if (element.prop('tagName').toLowerCase() === 'img') {
             value = element.attr('src');
+            if (value.includes('/')) {
+                value = value.split('/').pop();
+            }
         }
 
         var contentData = {
@@ -1477,21 +1535,20 @@ function SaveMultipleNewsTable() {
     var tablesData = tbl_tables.map((table) => {
         var tableRows = [];
         var $table = $(table.content);
-
-        // Process table header (thead)
         $table.find('thead tr').each(function (rowIndex) {
             $(this).find('th').each(function (colIndex) {
-                var headerContent = $(this).text().trim(); // Ensure text content is captured
-                if (headerContent && headerContent !== table.name) { // Exclude table name
+                var headerContent = $(this).text().trim(); 
+                if (headerContent && headerContent !== table.name) { 
                     tableRows.push({
                         rownumber: rowIndex + 1,
                         columnnumber: colIndex + 1,
-                        cellcontent: headerContent,  // Store the exact header content
-                        isheader: "1" // Header cells
+                        cellcontent: headerContent,  
+                        isheader: "1" 
                     });
                 }
             });
         });
+
 
         // Process table body (tbody)
         $table.find('tbody tr').each(function (rowIndex) {

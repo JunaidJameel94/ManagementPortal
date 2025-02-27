@@ -1,6 +1,7 @@
-var globalcollectionID;
+﻿var globalcollectionID;
 var news_ids;
 var thumbnailimagenewspath;
+let cropper;
 $(document).ready(function () {
     $('#summernote').summernote({
         height: 300, // Fixed height of 300px
@@ -25,6 +26,8 @@ $(document).ready(function () {
     GetCollectionName();
     SelectNewsslugsDropdown();
     SelectNewsTagDropdown();
+    SelectAuthorDropdown();
+    SelectCategoryDropdown();
     GetGraphType();
     MakeGraph();
     MakeTable();
@@ -60,45 +63,58 @@ $(document).ready(function () {
     $('#clearhtmltablefile').hide();
     $('#makeGraph').hide();
 
+    $('#cropImage').click(function () {
+        CropSaveFile();
+    });
+
 });
-document.querySelectorAll(".drop-zone__input").forEach((inputElement) => {
-    const dropZoneElement = inputElement.closest(".drop-zone");
-    dropZoneElement.addEventListener("click", (e) => {
+
+document.querySelectorAll(".drop-zone__input").forEach((inputElement) => { 
+    const dropZoneElement = inputElement.closest(".drop-zone"); 
+
+    dropZoneElement.addEventListener("click", () => {
         inputElement.click();
     });
-    inputElement.addEventListener("change", (e) => {
+
+    inputElement.addEventListener("change", () => {
         if (inputElement.files.length) {
-            updateThumbnailFromPath(dropZoneElement, inputElement.files[0]);
+            const file = inputElement.files[0];
+            const imageURL = URL.createObjectURL(file);
+            updateThumbnailFromPath(dropZoneElement, imageURL);
         }
     });
+
     dropZoneElement.addEventListener("dragover", (e) => {
         e.preventDefault();
         dropZoneElement.classList.add("drop-zone--over");
     });
-    ["dragleave", "dragend"].forEach((type) => {
-        dropZoneElement.addEventListener(type, (e) => {
+
+    ["dragleave", "dragend"].forEach((eventType) => {
+        dropZoneElement.addEventListener(eventType, () => {
             dropZoneElement.classList.remove("drop-zone--over");
         });
     });
+
     dropZoneElement.addEventListener("drop", (e) => {
         e.preventDefault();
         if (e.dataTransfer.files.length) {
             inputElement.files = e.dataTransfer.files;
-            updateThumbnailFromPath(dropZoneElement, e.dataTransfer.files[0]);
+            const imageURL = URL.createObjectURL(e.dataTransfer.files[0]);
+            updateThumbnailFromPath(dropZoneElement, imageURL);
         }
         dropZoneElement.classList.remove("drop-zone--over");
     });
-}); 
-  /**
-   * Updates the thumbnail on a drop zone element.
-   *
-   * @param {HTMLElement} dropZoneElement
-   * @param {File} file
-   */
+});
+
+/**
+ * Updates the thumbnail on a drop zone element.
+ *
+ * @param {HTMLElement} dropZoneElement
+ * @param {string} imagePath
+ */
 function updateThumbnailFromPath(dropZoneElement, imagePath) {
     let thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
 
-    // First time - remove the prompt
     if (dropZoneElement.querySelector(".drop-zone__prompt")) {
         dropZoneElement.querySelector(".drop-zone__prompt").remove();
     }
@@ -112,15 +128,15 @@ function updateThumbnailFromPath(dropZoneElement, imagePath) {
         thumbnailElement.style.display = "flex";
         thumbnailElement.style.alignItems = "center";
         thumbnailElement.style.justifyContent = "center";
-        thumbnailElement.style.height = "100%"; // Ensure it takes the full height of the container
-        thumbnailElement.style.overflow = "hidden"; // Prevent overflowing content
+        thumbnailElement.style.height = "100%"; 
+        thumbnailElement.style.overflow = "hidden"; 
         dropZoneElement.appendChild(thumbnailElement);
     }
 
     // Create an img element to display the uploaded image
     const imgElement = document.createElement("img");
-    imgElement.alt = "Uploaded Image"; // Set alt text
-    imgElement.src = imagePath; // Use the image path from the server
+    imgElement.alt = "Uploaded Image"; 
+    imgElement.src = '../images/' + imagePath; 
 
     // Style the img element to fit properly
     imgElement.style.width = "489px";
@@ -137,6 +153,28 @@ function updateThumbnailFromPath(dropZoneElement, imagePath) {
     thumbnailElement.innerHTML = '';
     thumbnailElement.appendChild(imgElement);
 }
+
+document.querySelector(".drop-zone__input").addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        const imageURL = URL.createObjectURL(file);
+        const image = document.createElement("img");
+        image.src = imageURL;
+        image.style.maxWidth = "100%";
+
+        document.querySelector(".crop-container").innerHTML = ""; // Clear old image
+        document.querySelector(".crop-container").appendChild(image);
+
+        if (cropper) {
+            cropper.destroy(); // Destroy previous cropper instance
+        }
+
+        cropper = new Cropper(image, {
+            aspectRatio: 1, // Square cropping
+            viewMode: 1,
+        });
+    }
+});
 
 document.addEventListener('DOMContentLoaded', function () {
     const addBox = document.querySelector('.add-box');
@@ -226,6 +264,66 @@ function SaveNewsImage() {
         });
     }
 }
+
+function CropSaveFile() {
+    if (!cropper) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error...',
+            text: 'Cropper is not initialized!',
+        });
+        return;
+    }
+
+    let canvas = cropper.getCroppedCanvas({
+        width: 200,
+        height: 200
+    });
+
+    if (!canvas) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error...',
+            text: 'Failed to crop the image!',
+        });
+        return;
+    }
+
+    canvas.toBlob(function (blob) {
+        if (!blob) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error...',
+                text: 'Failed to process the cropped image!',
+            });
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("croppedImage", blob, "cropped.jpg");
+
+        let fileInput = document.querySelector('.drop-zone__input');
+        if (fileInput.files.length > 0) {
+            formData.append('file', fileInput.files[0]); // Append original file
+        }
+
+        new APICALL(GetGlobalURL('FileUpload', 'CropSaveFileUpload'), 'POST', formData, true, true).FETCH((result, error) => {
+            if (result) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success...',
+                    text: 'Image uploaded successfully!',
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error...',
+                    text: 'Failed to upload the image!',
+                });
+            }
+        });
+    }, 'image/jpeg'); // Specify image format
+}
 function GetCollectionName() {
     UTILITY.CheckSession((data_) => {
         if (data_) {
@@ -314,8 +412,7 @@ function fetchCollectionData(collectionId, containerId) {
                 const description = $(this).data("description");
                 const content = $(this).data("content");
                 let image = '../' + $(this).data("image");
-                const viewurl = GetViewURL();
-                var newimage = viewurl + image;
+
                 // Set values for the form fields
                 $("#addtitle").val(title);
                 $("#adddescription").val(description);
@@ -415,7 +512,50 @@ function SelectNewsTagDropdown() {
         }
     });
 }
-
+function SelectAuthorDropdown() {
+    new APICALL(GetGlobalURL('Base', 'GetALLAuthor'), 'GET', '', true).FETCH((result, error) => {
+        if (result) {
+            if (result.data != null) {
+                $('#AuthorName').append('<option hidden="true">Select Author</option>');
+                $.each(result.data, function (i, option) {
+                    $('#AuthorName').append(
+                        '<option value="' + option.id + '">' + option.authorname + '</option>'
+                    );
+                });
+            }
+        }
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error...',
+                text: error.data.responseText,
+                footer: ''
+            });
+        }
+    });
+}
+function SelectCategoryDropdown() {
+    new APICALL(GetGlobalURL('Base', 'GetALLCategory'), 'GET', '', true).FETCH((result, error) => {
+        if (result) {
+            if (result.data != null) {
+                $('#CategoryName').append('<option hidden="true">Select Category</option>');
+                $.each(result.data, function (i, option) {
+                    $('#CategoryName').append(
+                        '<option value="' + option.cat_id + '">' + option.category_name + '</option>'
+                    );
+                });
+            }
+        }
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error...',
+                text: error.data.responseText,
+                footer: ''
+            });
+        }
+    });
+}
 function typingAnimation(text, targetElement, speed) {
     let index = 0;
     // Clear the content of the target element
@@ -593,29 +733,23 @@ function removeSeries(button) {
 }
 function MakeTable() {
     $('#CreateNewtable').on('click', function () {
-       
         $('#editable-table').hide();  
         $('.add-box-form').removeClass('d-none');
         $('#clearhtmltablefile').hide();  
         $('#makeGraph').hide();  
     });
-
-    $('#GenerateTable').on('click', function () {
-        
+    $('#GenerateTable').on('click', function () { 
         var tableName = $('#TableName').val();
         var tableRows = $('#TableRows').val();
         var tableColumns = $('#TableColumns').val();
-
         if (!tableName || !tableRows || !tableColumns) {
             alert('Please enter all the details!');
             return;
         }
         var tableHTML = '<div class="table-responsive"><table class="table table-bordered table-striped data" formid="5">';
         tableHTML += '<thead><tr>';
-
         tableHTML += '<th colspan="' + tableColumns + '" contenteditable="true">' + tableName + '</th>';
         tableHTML += '</tr><tr>';
-
         for (var i = 0; i < tableColumns; i++) {
             tableHTML += '<th contenteditable="true">Header ' + (i + 1) + '</th>';
         }
@@ -630,7 +764,6 @@ function MakeTable() {
         tableHTML += '</tbody>';
         $('#editable-table').html(tableHTML);
         $('#editable-table').show();
-
     });
 }
 function readAndDisplayCSVFile() {
@@ -843,7 +976,6 @@ function populateGraphForm(rows) {
     $('#LabelOrientation').val(uniqueDates.join(', ')); // Set the LabelOrientation with all the dates
 }
 
-
 $('#GenerateChart').on('click', function () {
     var seriesNames = [];
     var chartValues = [];
@@ -900,8 +1032,28 @@ function SaveNews() {
     var ntitle = $("#addtitle").val().trim();
     var nadddescription = $("#adddescription").val().trim();
 
+    var CategoryName = $('#CategoryName').val() ? $('#CategoryName').val() : '';
+    var AuthorName = $('#AuthorName').val() ? $('#AuthorName').val() : '';
 
     if (ntitle === "") {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Validation Error',
+            text: 'Please enter a Title.',
+            footer: ''
+        });
+        return;
+    }
+    if (CategoryName === "") {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Validation Error',
+            text: 'Please enter a Title.',
+            footer: ''
+        });
+        return;
+    }
+    if (AuthorName === "") {
         Swal.fire({
             icon: 'warning',
             title: 'Validation Error',
@@ -926,6 +1078,8 @@ function SaveNews() {
     var TemplateID = 1;
     var TagName = $('#TagName').val() ? $('#TagName').val() : '';
     var SlugName = $('#SlugName').val() ? $('#SlugName').val() : '';
+    var highlighed = $("#chkHighlighted").is(":checked") ? 1 : 0;
+    
     var NewsStatus = 0;
     var Islive = 0;
 
@@ -1025,6 +1179,9 @@ function SaveNews() {
             TemplateID: TemplateID,
             TagID: TagName,
             SlugID: SlugName,
+            Highlighted: highlighed,
+            AuthorID: AuthorName,
+            CategoryID: CategoryName,
             NewsStatus: NewsStatus,
             Islive: Islive,
             GraphTypeID: graphtypeid,
@@ -1070,18 +1227,23 @@ function SaveNewsContent() {
     var contents = [];
     $('.data').each(function () {
         var element = $(this);
-        var formId = element.attr('formid'); 
-        var value = element.val();  
+        var formId = element.attr('formid');
+        var value = element.val();
+
         if (element.prop('tagName').toLowerCase() === 'img') {
-            value = element.attr('src'); 
+            value = element.attr('src');
+
+            // Sirf filename extract karne ke liye
+            if (value.includes('/')) {
+                value = value.split('/').pop();
+            }
         }
 
         var contentData = {
-            NewsID: news_ids,  
+            NewsID: news_ids,
             FormID: formId,
             NewsContent: value,
         };
-
         contents.push(contentData);
     });
 
@@ -1127,7 +1289,6 @@ function clearAllFeild() {
     $('.add-box-form').addClass('d-none');
     $('.add-box-table').removeClass('d-none');
 }
-
 
 async function TextToImageGenerate() {
     const textPrompt = $("#textPrompt").val();

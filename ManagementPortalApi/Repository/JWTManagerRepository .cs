@@ -26,7 +26,7 @@ namespace ManagementPortalApi.Repository
             }
 
             // Else we generate JSON Web Token
-            var tokenexpirey = DateTime.UtcNow.AddMinutes(5);
+            var tokenexpirey = DateTime.UtcNow.AddMinutes(60);
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenKey = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("AM_JWT_KEY"));
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -64,7 +64,7 @@ namespace ManagementPortalApi.Repository
             }
 
             // Else we generate JSON Web Token
-            var tokenexpirey = DateTime.UtcNow.AddMinutes(5);
+            var tokenexpirey = DateTime.UtcNow.AddMinutes(60);
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenKey = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("AM_JWT_KEY"));
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -81,7 +81,7 @@ namespace ManagementPortalApi.Repository
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
             var tokeinitiatedatetime = DateTime.Now;
-            var tokenexpirydatetime = DateTime.Now.AddMinutes(5);
+            var tokenexpirydatetime = DateTime.Now.AddMinutes(60);
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return new Tokens

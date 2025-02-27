@@ -8,41 +8,39 @@ $(document).ready(function () {
 
     });
 });
-
-
 function GetNewsDetail() {
     UTILITY.CheckSession((data_) => {
         if (data_) {
             new APICALL(GetGlobalURL('Base', 'Get_News_DetailForMGEditor'), 'GET', '', true).FETCH((result, error) => {
                 if (result) {
                     if (result.data != null) {
-                        $('#newsContainer').empty(); // Clear any existing content
+                        $('#newsContainer').empty();
 
                         $.each(result.data, function (i, detail) {
 
                             var Edit = (data_[0].AllowUpdate == true)
-                                ? '<button class="btn btn-primary btn-sm edit-btn w-100" data-id="' + detail.newsID + ' "data-template-id="' + detail.templateid+'" ><i class="fa fa-edit"></i> Edit</button>'
+                                ? '<button class="btn btn-primary btn-sm edit-btn w-100" data-id="' + detail.newsid + ' "data-template-id="' + detail.templateid+'" ><i class="fa fa-edit"></i> Edit</button>'
                                 : '';
 
                             var SendApproval = (data_[0].AllowUpdate == true)
-                                ? '<button class="btn btn-success btn-sm sendapproval-btn w-100" data-id="' + detail.newsID + '"><i class="fas fa-check-circle"></i> Send Publisher</button>'
+                                ? '<button class="btn btn-success btn-sm sendapproval-btn w-100" data-id="' + detail.newsid + '"><i class="fas fa-check-circle"></i> Send Publisher</button>'
                                 : '';
 
                             var SendCreater = (data_[0].AllowUpdate == true)
-                                ? '<button class="btn btn-warning btn-sm sendcreater-btn w-100" data-id="' + detail.newsID + '"><i class="fas fa-check-circle"></i> Send Creator</button>'
+                                ? '<button class="btn btn-warning btn-sm sendcreater-btn w-100" data-id="' + detail.newsid + '"><i class="fas fa-check-circle"></i> Send Creator</button>'
                                 : '';
 
                             var remarkscreator = detail.CreatorRemarks ? `<p>${detail.CreatorRemarks}</p>` : 'No Remarks Provided By News Creator';
                             var remarkspublisher = detail.PublisherRemarks ? `<p> ${detail.PublisherRemarks}</p>` : 'No Remarks Provided By News Publisher';
 
-                            if (detail.NewsStatus == 1 && detail.isDeleted == 0) {
+                          
                                 var newsItem = `
                               
                                     <div class="card-body">
                                         <div class="row align-items-center">
                                             <div class="col-md-2 col-12 text-center">
                                                 <div class="newsimg-div">
-                                                    <img src="${detail.Newsimage}" class="img-fluid rounded-lg shadow-sm" alt="News Image">
+                                                    <img src="../images/${detail.Newsimage}" class="img-fluid rounded-lg shadow-sm" alt="News Image">
                                                 </div>
                                             </div>
                                             <div class="col-md-6 col-12">
@@ -91,11 +89,9 @@ function GetNewsDetail() {
                                     </div>`;
 
 
-                                $('#newsContainer').append(newsItem); // Append only if not deleted
-                            }
+                                $('#newsContainer').append(newsItem);
+                            
                         });
-
-                        // Attach event handlers to the buttons
                         $('.edit-btn').click(function () {
                             newsID = $(this).data('id');
                             GlobalTemplateID = $(this).data('template-id');
@@ -107,16 +103,13 @@ function GetNewsDetail() {
                                 window.location.href = `../Feed/MultipleNewsEdit?newsID=${newsID}`;
                             }
                         });
-
-
                         $('.sendapproval-btn').click(function () {
                             newsID = $(this).data('id');
                             EditorSendToPublisher(newsID);
                         });
-
                         $('.sendcreater-btn').click(function () {
                             var newsID = $(this).data('id');
-                            $('#remarks-section').removeClass('d-none'); // Show the remarks section
+                            $('#remarks-section').removeClass('d-none');
                             EditorSendToCreater(newsID);
                         });
                     }
@@ -124,7 +117,6 @@ function GetNewsDetail() {
             });
         }
     });
-
 }
 
 function EditorSendToPublisher(newsID) {
@@ -150,8 +142,6 @@ function EditorSendToPublisher(newsID) {
         }
     });
 }
-
-
 
 function EditorSendToCreater(newsID) {
     $('#submit-remarks').data('news-id', newsID);

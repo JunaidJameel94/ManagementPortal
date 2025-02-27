@@ -8,22 +8,31 @@ using System.Globalization;
 using System.Text;
 using System.Web;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+
 namespace ManagementPortalApi.Models
 {
 
     public class RssFeedService : IHostedService, IDisposable
     {
         string sender = (Environment.GetEnvironmentVariable("sender") != null ? Environment.GetEnvironmentVariable("sender").ToString() : "");
+        string Source = (Environment.GetEnvironmentVariable("Source") != null ? Environment.GetEnvironmentVariable("Source").ToString() : "");
         string origin = (Environment.GetEnvironmentVariable("origin") != null ? Environment.GetEnvironmentVariable("origin").ToString() : "");
+        string credit = (Environment.GetEnvironmentVariable("credit") != null ? Environment.GetEnvironmentVariable("credit").ToString() : "");
+        string Rss2version = (Environment.GetEnvironmentVariable("Rss2version") != null ? Environment.GetEnvironmentVariable("Rss2version").ToString() : "");
+        string language = (Environment.GetEnvironmentVariable("language") != null ? Environment.GetEnvironmentVariable("language").ToString() : "");
+        string channelDescription = (Environment.GetEnvironmentVariable("channelDescription") != null ? Environment.GetEnvironmentVariable("channelDescription").ToString() : "");
+        string channelLink = (Environment.GetEnvironmentVariable("channelLink") != null ? Environment.GetEnvironmentVariable("channelLink").ToString() : "");
+        string channelTitle = (Environment.GetEnvironmentVariable("channelTitle") != null ? Environment.GetEnvironmentVariable("channelTitle").ToString() : "");
+        string RevisionId = (Environment.GetEnvironmentVariable("RevisionId") != null ? Environment.GetEnvironmentVariable("RevisionId").ToString() : "");
+        string ProviderId = (Environment.GetEnvironmentVariable("ProviderId") != null ? Environment.GetEnvironmentVariable("ProviderId").ToString() : "");
         string NewsMLG2Namespace = (Environment.GetEnvironmentVariable("NewsMLG2Namespace") != null ? Environment.GetEnvironmentVariable("NewsMLG2Namespace").ToString() : "");
         string NewsMLG2Version = (Environment.GetEnvironmentVariable("NewsMLG2Version") != null ? Environment.GetEnvironmentVariable("NewsMLG2Version").ToString() : "");
         string NewsMLG1Namespace = (Environment.GetEnvironmentVariable("NewsMLG1Namespace") != null ? Environment.GetEnvironmentVariable("NewsMLG1Namespace").ToString() : "");
         string NewsMLG1Version = (Environment.GetEnvironmentVariable("NewsMLG1Version") != null ? Environment.GetEnvironmentVariable("NewsMLG1Version").ToString() : "");
         string NewsMLG1NewsEnvelope = (Environment.GetEnvironmentVariable("NewsMLG1NewsEnvelope") != null ? Environment.GetEnvironmentVariable("NewsMLG1NewsEnvelope").ToString() : "");
         string NewsAtomNamespace = (Environment.GetEnvironmentVariable("NewsAtomNamespace") != null ? Environment.GetEnvironmentVariable("NewsAtomNamespace").ToString() : "");
-        string RSS2MettisLink = (Environment.GetEnvironmentVariable("RSS2MettisLink") != null ? Environment.GetEnvironmentVariable("RSS2MettisLink").ToString() : "");
-        string MettisRSSDescription = (Environment.GetEnvironmentVariable("MettisRSSDescription") != null ? Environment.GetEnvironmentVariable("MettisRSSDescription").ToString() : "");
-
+        
 
 
         private readonly ILogger<RssFeedService> _logger;
@@ -39,12 +48,25 @@ namespace ManagementPortalApi.Models
 
 
         #region RSS FEED READER
+        //public Task StartAsync(CancellationToken cancellationToken)
+        //{
+        //    _logger.LogInformation("RssFeedService is starting.");
+        //    _timer = new Timer(ProcessFeeds, null, TimeSpan.Zero, TimeSpan.FromMinutes(15)); // Run every 10 minutes
+        //    return Task.CompletedTask;
+        //}
+
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("RssFeedService is starting.");
-            _timer = new Timer(ProcessFeeds, null, TimeSpan.Zero, TimeSpan.FromMinutes(15)); // Run every 10 minutes
+
+            // Environment variable se interval lena
+            int intervalMinutes = int.TryParse(Environment.GetEnvironmentVariable("RSS_FEED_INTERVAL"), out int minutes) ? minutes : 15;
+
+            _timer = new Timer(ProcessFeeds, null, TimeSpan.Zero, TimeSpan.FromMinutes(intervalMinutes));
+
             return Task.CompletedTask;
         }
+
 
         private async void ProcessFeeds(object state)
         {
@@ -329,26 +351,18 @@ namespace ManagementPortalApi.Models
             XNamespace ns = NewsMLG2Namespace;
             if (dt.Rows.Count == 0)
                 return string.Empty;
-
-            // Initialize variables for different fields
             List<string> headlines = new List<string>();
             List<string> contents = new List<string>();
             List<string> descriptions = new List<string>();
             List<string> images = new List<string>();
-            HashSet<string> graphData = new HashSet<string>(); // For graph data
-            HashSet<string> existingTableNames = new HashSet<string>(); // To track table names
-            List<XElement> tables = new List<XElement>(); // For table data
-
-            // Initialize Graph metadata
+            HashSet<string> graphData = new HashSet<string>(); 
+            HashSet<string> existingTableNames = new HashSet<string>(); 
+            List<XElement> tables = new List<XElement>();
             string graphtitle = string.Empty;
             string graphsubtitle = string.Empty;
             string graphid = string.Empty;
-
-            // Initialize Slugs and Tags
             HashSet<string> uniqueSlugs = new HashSet<string>();
             HashSet<string> uniqueTags = new HashSet<string>();
-
-            // Loop through the rows and dynamically assign content based on formid
             foreach (DataRow row in dt.Rows)
             {
                 if (row.ItemArray.Length >= 6) // Ensure the column exists
@@ -472,17 +486,14 @@ namespace ManagementPortalApi.Models
                     }
                 }
             }
-
-            // Create the XML structure with slugs and tags data
-            // Create the XML structure with slugs and tags data
             XDocument xmlDoc = new XDocument(
                 new XElement(ns + "newsMessage",
-                    new XAttribute("version", "2.0"),
+                    new XAttribute("version", NewsMLG2Version),
                     new XElement(ns + "header",
-                        new XElement(ns + "sender", "Mettis Global News"),
+                        new XElement(ns + "sender", sender),
                         new XElement(ns + "sent", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss")),
-                        new XElement(ns + "source", "Mettis Global News"),
-                        new XElement(ns + "origin", "Mettis Global News Platform")
+                        new XElement(ns + "source", Source),
+                        new XElement(ns + "origin", origin)
                     ),
                     new XElement(ns + "itemSet",
                         new XElement(ns + "newsItem",
@@ -490,26 +501,21 @@ namespace ManagementPortalApi.Models
                                 headlines.Count > 0 ? headlines.Select(h => new XElement(ns + "headline", h)) : null,
                                 new XElement(ns + "language", new XAttribute("tag", "en")),
                                 new XElement(ns + "genre", new XAttribute("qcode", "n genre:financial")),
-                                new XElement(ns + "credit", "MettisGlobalNews"),
-                                // Add slugs data here
+                                new XElement(ns + "credit", credit),
                                 uniqueSlugs.Count > 0 ? new XElement(ns + "slugs", uniqueSlugs.Select(s => new XElement(ns + "slug", s))) : null,
-                                // Add tags data here
                                 uniqueTags.Count > 0 ? new XElement(ns + "tags", uniqueTags.Select(t => new XElement(ns + "tag", t))) : null
                             ),
                             new XElement(ns + "contentSet",
                                 new XElement(ns + "inlineXML",
-                                    // Add descriptions and contents
                                     descriptions.Count > 0 ? descriptions.Select(d => new XElement(ns + "description", d)) : null,
                                     contents.Count > 0 ? contents.Select(c => new XElement(ns + "content", c)) : null,
-                                    // Add images if present
                                     images.Count > 0 ? images.Select(img => new XElement(ns + "image", new XElement(ns + "url", HtmlDecodeSafe(img)))) : null,
-                                    // Add graph data
                                     graphData.Count > 0 ? new XElement(ns + "graphData",
                                         new XElement(ns + "graphtitle", graphtitle),
                                         new XElement(ns + "graphsubtitle", graphsubtitle),
                                         new XElement(ns + "graphid", graphid),
                                         string.Join(",", graphData)) : null,
-                                    // Add tables
+                   
                                     tables.Count > 0 ? tables : null
                                 )
                             )
@@ -523,8 +529,6 @@ namespace ManagementPortalApi.Models
 
             return xmlDoc.ToString(SaveOptions.None);
         }
-
-
         public string GenerateNews_NewsMLG1(DataTable dt)
         {
             XNamespace ns = NewsMLG1Namespace;
@@ -533,8 +537,6 @@ namespace ManagementPortalApi.Models
                 return string.Empty;
 
             DataRow row = dt.Rows[0];
-
-            // Decoding and sanitizing inputs
             string headline = HtmlDecodeSafe(row["headline"]?.ToString())?.Replace("\"", string.Empty);
             string byline = HtmlDecodeSafe(row["Author"]?.ToString() ?? string.Empty)?.Replace("\"", string.Empty);
             string description = HtmlDecodeSafe(row["Metadescription"]?.ToString() ?? string.Empty)?.Replace("\"", string.Empty);
@@ -546,20 +548,20 @@ namespace ManagementPortalApi.Models
             XDocument xmlDoc = new XDocument(
                 new XElement(ns + "NewsML",
                     new XAttribute("Version", NewsMLG1Version),
-                    new XElement(ns + "NewsEnvelope",
+                    new XElement(ns + NewsMLG1NewsEnvelope,
                         new XElement(ns + "TransmissionID", Guid.NewGuid().ToString()),
                         new XElement(ns + "SentDate", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss")),
-                        new XElement(ns + "Sender", "MettisGlobalNews")
+                        new XElement(ns + "Sender", sender)
                     ),
                     new XElement(ns + "NewsItem",
                         new XAttribute("NewsItemID", Guid.NewGuid().ToString()),
                         new XAttribute("DateAndTime", ((DateTime?)row["CreatedDate"])?.ToString("yyyy-MM-ddTHH:mm:ss") ?? string.Empty),
                         new XElement(ns + "Identification",
                             new XElement(ns + "NewsIdentifier",
-                                new XElement(ns + "ProviderId", "MettisGlobalNews"),
+                                new XElement(ns + "ProviderId", ProviderId),
                                 new XElement(ns + "DateId", DateTime.UtcNow.ToString("yyyyMMdd")),
                                 new XElement(ns + "NewsItemId", Guid.NewGuid().ToString()),
-                                new XElement(ns + "RevisionId", "1")
+                                new XElement(ns + "RevisionId", RevisionId)
                             )
                         ),
                         new XElement(ns + "NewsManagement",
@@ -576,17 +578,11 @@ namespace ManagementPortalApi.Models
                                     new XElement(ns + "byline", byline),
                                     new XElement(ns + "description", description),
                                     new XElement(ns + "content", content),
-
-                                    // Adding images if available
                                     !string.IsNullOrEmpty(imageUrls) ? new XElement(ns + "images",
                                         from imageUrl in imageUrls.Split(',')
                                         select new XElement(ns + "image", imageUrl.Trim())
                                     ) : null,
-
-                                    // Adding graph content if available
                                     !string.IsNullOrEmpty(graphContent) ? new XElement(ns + "graphContent", graphContent) : null,
-
-                                    // Adding table content if available
                                     !string.IsNullOrEmpty(tableContent) ? new XElement(ns + "tableContent", tableContent) : null
                                 )
                             )
@@ -597,81 +593,53 @@ namespace ManagementPortalApi.Models
 
             return xmlDoc.ToString(SaveOptions.None);
         }
-
-
         public string GenerateNews_Atom(DataTable dt)
         {
-            // Define the Atom namespace
-            XNamespace atomNs = "http://www.w3.org/2005/Atom";
-
-            // Return an empty string if the DataTable has no rows
+            XNamespace atomNs = NewsAtomNamespace;
             if (dt == null || dt.Rows.Count == 0)
                 return string.Empty;
-
-            // Create the root <feed> element
             XElement feed = new XElement(atomNs + "feed",
-                new XElement(atomNs + "title", "News Feed"), // Feed title
-                new XElement(atomNs + "updated", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss") + "Z"), // Current UTC time
-                new XElement(atomNs + "id", "urn:uuid:" + Guid.NewGuid()), // Unique identifier for the feed
+                new XElement(atomNs + "title", "News Feed"),
+                new XElement(atomNs + "updated", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss") + "Z"), 
+                new XElement(atomNs + "id", "urn:uuid:" + Guid.NewGuid()), 
                 new XElement(atomNs + "author",
-                    new XElement(atomNs + "name", "MettisGlobalNews") // Default author name
+                    new XElement(atomNs + "name", ProviderId) 
                 )
             );
-
-            // Iterate through each row in the DataTable and create <entry> elements
             foreach (DataRow row in dt.Rows)
             {
                 // Decode and sanitize input values
                 string title = HttpUtility.HtmlDecode(row["Title"]?.ToString() ?? string.Empty).Replace("\"", string.Empty);
                 string summary = HttpUtility.HtmlDecode(row["Metadescription"]?.ToString() ?? string.Empty).Replace("\"", string.Empty);
                 string content = HttpUtility.HtmlDecode(row["Content"]?.ToString() ?? string.Empty).Replace("\"", string.Empty);
-                string link = row["Link"]?.ToString() ?? "https://example.com"; // Use a default link if none is provided
+                string link = row["Link"]?.ToString() ?? "https://example.com"; 
                 string author = row["Author"]?.ToString() ?? "Unknown Author";
                 DateTime? publishedDate = row["Createddate"] as DateTime?;
-
-                // Create the <entry> element for the current row
                 XElement entry = new XElement(atomNs + "entry",
-                    new XElement(atomNs + "title", title), // Entry title
-                    new XElement(atomNs + "link", new XAttribute("href", link)), // Entry link
-                    new XElement(atomNs + "id", "urn:uuid:" + (row["GUID"] ?? Guid.NewGuid().ToString())), // Unique identifier
-                    new XElement(atomNs + "updated", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss") + "Z"), // Last updated time
-                    new XElement(atomNs + "published", publishedDate?.ToString("yyyy-MM-ddTHH:mm:ss") + "Z" ?? string.Empty), // Published time
-                    new XElement(atomNs + "summary", summary), // Summary of the entry
+                    new XElement(atomNs + "title", title), 
+                    new XElement(atomNs + "link", new XAttribute("href", link)),
+                    new XElement(atomNs + "id", "urn:uuid:" + (row["GUID"] ?? Guid.NewGuid().ToString())), 
+                    new XElement(atomNs + "updated", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss") + "Z"), 
+                    new XElement(atomNs + "published", publishedDate?.ToString("yyyy-MM-ddTHH:mm:ss") + "Z" ?? string.Empty),
+                    new XElement(atomNs + "summary", summary),
                     new XElement(atomNs + "author",
-                        new XElement(atomNs + "name", author) // Author name
+                        new XElement(atomNs + "name", author)
                     ),
-                    new XElement(atomNs + "content", new XAttribute("type", "html"), content) // Content (HTML allowed)
+                    new XElement(atomNs + "content", new XAttribute("type", "html"), content)
                 );
-
-                // Add the <entry> element to the feed
                 feed.Add(entry);
             }
-
-            // Create the XDocument and return its string representation
             XDocument atomDoc = new XDocument(feed);
             return atomDoc.ToString(SaveOptions.None);
         }
-
-
         public string GenerateNews_RSS2(DataTable dt)
         {
-            // Return an empty string if the DataTable is empty
             if (dt == null || dt.Rows.Count == 0)
                 return string.Empty;
-
-            // Helper function to decode HTML and sanitize strings
             string HtmlDecodeSafe(string input) => HttpUtility.HtmlDecode(input ?? string.Empty)?.Replace("\"", string.Empty);
-
-            // Prepare metadata for the channel
-            string channelTitle = "Mettis Global RSS Feed";
-            string channelLink = "https://www.mettisglobal.com";
-            string channelDescription = "Latest news updates from Mettis Global";
-            string language = "en-us";
-
-            // Create the root <rss> element
             XDocument rssDoc = new XDocument(
                 new XElement("rss",
-                    new XAttribute("version", "2.0"),
+                    new XAttribute("version", Rss2version),
                     new XElement("channel",
                         new XElement("title", channelTitle),
                         new XElement("link", channelLink),
@@ -682,14 +650,9 @@ namespace ManagementPortalApi.Models
                     )
                 )
             );
-
-            // Get a reference to the <channel> element
             XElement channel = rssDoc.Root.Element("channel");
-
-            // Iterate over each row in the DataTable to create <item> elements
             foreach (DataRow row in dt.Rows)
             {
-                // Decode and sanitize values
                 string title = HtmlDecodeSafe(row["Title"]?.ToString());
                 string link = HtmlDecodeSafe(row["Link"]?.ToString());
                 string guid = row["GUID"]?.ToString() ?? Guid.NewGuid().ToString();
@@ -699,8 +662,6 @@ namespace ManagementPortalApi.Models
                 string content = HtmlDecodeSafe(row["Content"]?.ToString());
                 string table = HtmlDecodeSafe(row["Table"]?.ToString());
                 string imageUrls = HtmlDecodeSafe(row["ImageUrls"]?.ToString());
-
-                // Create the <item> element
                 XElement item = new XElement("item",
                     new XElement("title", title),
                     new XElement("link", link),
@@ -709,15 +670,11 @@ namespace ManagementPortalApi.Models
                     new XElement("description", description),
                     new XElement("author", author)
                 );
-
-                // Add optional <content> and <table> elements if they exist
                 if (!string.IsNullOrEmpty(content))
                     item.Add(new XElement("content", content));
 
                 if (!string.IsNullOrEmpty(table))
                     item.Add(new XElement("table", table));
-
-                // Add optional <image> elements if image URLs exist
                 if (!string.IsNullOrEmpty(imageUrls))
                 {
                     XElement imageElement = new XElement("image");
@@ -727,66 +684,99 @@ namespace ManagementPortalApi.Models
                     }
                     item.Add(imageElement);
                 }
-
-                // Add the <item> element to the <channel>
                 channel.Add(item);
             }
-
-            // Return the RSS feed as a string
             return rssDoc.ToString(SaveOptions.None);
         }
 
-        public string GenerateNews_JSON(DataTable dt)
+        //public string GenerateNews_JSON(DataTable dt)
+        //{
+        //    if (dt == null || dt.Rows.Count == 0)
+        //        return string.Empty;
+        //    string HtmlDecodeSafe(string input) => HttpUtility.HtmlDecode(input ?? string.Empty)?.Replace("\"", string.Empty);
+        //    var jsondata = Newtonsoft.Json.JsonConvert.SerializeObject(dt);
+
+        //    return jsondata;
+        //}
+
+        //public string GenerateNews_JSON(DataTable dt)
+        //{
+        //    return JsonConvert.SerializeObject(dt, Formatting.Indented);
+        //}
+
+
+        internal string GenerateNews_JSON(List<MGNews.MGNews> newsList)
         {
-            if (dt == null || dt.Rows.Count == 0)
-                return string.Empty;
-
-            // Helper function to decode HTML and sanitize strings
-            string HtmlDecodeSafe(string input) => HttpUtility.HtmlDecode(input ?? string.Empty)?.Replace("\"", string.Empty);
-
-            // List to hold all news items
-            //var newsItems = new List<object>();
-
-            //foreach (DataRow row in dt.Rows)
-            //{
-            //    // Decode and sanitize values
-            //    string title = HtmlDecodeSafe(row["Title"]?.ToString());
-            //    string imageUrl = HtmlDecodeSafe(row["ImageUrls"]?.ToString());
-            //    string content = HtmlDecodeSafe(row["Content"]?.ToString());
-            //    string graph = HtmlDecodeSafe(row["Graph"]?.ToString());
-            //    string table = HtmlDecodeSafe(row["Table"]?.ToString());
-            //    string guid = row["GUID"]?.ToString() ?? Guid.NewGuid().ToString();
-            //    string pubDate = ((DateTime?)row["Createddate"])?.ToString("yyyy-MM-ddTHH:mm:ss") ?? DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss");
-            //    string author = HtmlDecodeSafe(row["Author"]?.ToString());
-            //    string source = "https://www.mettisglobal.com";
-
-            //    // Create the news item object
-            //    var newsItem = new
-            //    {
-            //        title = title,
-            //        imageUrl = imageUrl,
-            //        content = content,
-            //        graph = graph,
-            //        table = table,
-            //        guid = guid,
-            //        pubDate = pubDate,
-            //        author = author,
-            //        source = source
-            //    };
-
-            //    // Add to the list
-            //    newsItems.Add(newsItem);
-            //}
-
-            // Serialize all news items to JSON format
-            //var jsonOutput = Newtonsoft.Json.JsonConvert.SerializeObject(new
-            //{
-            //    //news = newsItems
-            //}, Newtonsoft.Json.Formatting.Indented);
-            var jsondata = Newtonsoft.Json.JsonConvert.SerializeObject(dt);
-
-            return jsondata;
+            return JsonConvert.SerializeObject(newsList, Formatting.Indented);
         }
+
+        public string GenerateNews_XML(DataTable dt)
+        {
+            var xmlResponse = new StringBuilder();
+            xmlResponse.AppendLine("<DocumentElement>");
+
+            foreach (DataRow row in dt.Rows)
+            {
+                
+               
+                string headline = row["Heading"].ToString();
+                string content = row["Content"].ToString();
+                string newsLink = "https://mettisglobal.net/";
+                string imageUrl = row["Image"].ToString();
+                DateTime PublishedDate = Convert.ToDateTime(row["NewsDate"]);
+                string formattedDate = PublishedDate.ToString("MMMM dd, yyyy 'at' hh:mm tt 'GMT'zzz");
+                //string PublishedTime = row["NewsDate"].ToString();
+
+                string tags = row["Tags"].ToString();
+                string description = row["Description"].ToString();
+                string Category = row["Category"].ToString();
+                string newsID = row["NewsID"].ToString();
+                string Graph = row["Graph"].ToString();
+                string Table = row["Table"].ToString();
+                string AuthotName = row["AuthorName"].ToString();
+                //string AuthotName = sender;
+
+                string OnBlog = "OnBlog".ToString();
+                var xmlNews = new StringBuilder();
+                xmlNews.AppendLine("<MettisGlobalNews>");
+                if (!string.IsNullOrEmpty(headline))
+                {
+                    xmlNews.AppendLine($"<Headline>{System.Security.SecurityElement.Escape(headline)}</Headline>");
+                }
+                if (!string.IsNullOrEmpty(content))
+                {
+                    xmlNews.AppendLine($"<News>{System.Security.SecurityElement.Escape(content)}</News>");
+                }
+                xmlNews.AppendLine($"<NewsLink>{newsLink}</NewsLink>");
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    xmlNews.AppendLine($"<ImageUrl>{System.Security.SecurityElement.Escape(imageUrl)}</ImageUrl>");
+                }
+                xmlNews.AppendLine($"<NewsDate>{formattedDate}</NewsDate>");
+                if (!string.IsNullOrEmpty(tags))
+                {
+                    xmlNews.AppendLine($"<Tags>{System.Security.SecurityElement.Escape(tags)}</Tags>");
+                    xmlNews.AppendLine($"<Categories>{System.Security.SecurityElement.Escape(Category)}</Categories>");
+                }
+                if (!string.IsNullOrEmpty(description))
+                {
+                    xmlNews.AppendLine($"<Description>{System.Security.SecurityElement.Escape(description)}</Description>");
+                }
+                if (!string.IsNullOrEmpty(AuthotName))
+                {
+                    xmlNews.AppendLine($"<AuthotName>{System.Security.SecurityElement.Escape(AuthotName)}</AuthotName>");
+                }
+
+                xmlNews.AppendLine($"<NewsID>{newsID}</NewsID>");
+                xmlNews.AppendLine($"<OnBlog>{OnBlog}</OnBlog>");
+                
+                xmlNews.AppendLine("</MettisGlobalNews>");
+                xmlResponse.AppendLine(xmlNews.ToString());
+            }
+            xmlResponse.AppendLine("</DocumentElement>");
+            return xmlResponse.ToString();
+        }
+
 
         public string GenerateNews_CustomText(DataTable dt)
         {
@@ -794,22 +784,16 @@ namespace ManagementPortalApi.Models
                 return string.Empty;
 
             var newsText = new StringBuilder();
-
-            // Handling potential null or empty values, ensuring no unwanted quotes
             string title = HtmlDecodeSafe(dt.Rows.Count > 0 ? dt.Rows[0].ItemArray[6]?.ToString() : "N/A")?.Replace("\"", string.Empty);
             string imageUrl = dt.Rows.Count > 1 ? HtmlDecodeSafe(dt.Rows[1].ItemArray[6]?.ToString())?.Replace("\"", string.Empty) : "N/A";
             string content = dt.Rows.Count > 2 ? HtmlDecodeSafe(dt.Rows[2].ItemArray[6]?.ToString())?.Replace("\"", string.Empty) : "N/A";
             string graph = dt.Rows.Count > 3 ? HtmlDecodeSafe(dt.Rows[3].ItemArray[6]?.ToString())?.Replace("\"", string.Empty) : "N/A";
             string table = dt.Rows.Count > 4 ? HtmlDecodeSafe(dt.Rows[4].ItemArray[6]?.ToString())?.Replace("\"", string.Empty) : "N/A";
-
-            // Append the formatted news text
             newsText.AppendLine("Title: " + title);
             newsText.AppendLine("Image URL: " + imageUrl);
             newsText.AppendLine("Content: " + content);
             newsText.AppendLine("Graph: " + graph);
             newsText.AppendLine("Table: " + table);
-
-            // Add sender information, ensuring it defaults to "N/A" if null
             newsText.AppendLine("---------------------------" + (sender ?? "N/A") + "----------------------------------");
 
             return newsText.ToString();
@@ -833,6 +817,13 @@ namespace ManagementPortalApi.Models
         {
             _timer?.Dispose();
         }
+
+        internal string GenerateNews_NewsMLG2(List<MGNews.MGNews> newsList)
+        {
+            throw new NotImplementedException();
+        }
+
+     
     }
     
     public class feedUrls

@@ -44,7 +44,6 @@ namespace ManagementPortalApi.Controllers
         [HttpPost]
         public IActionResult apitoken(ApiUserDTO usersdatas)
         {
-
             ApiUser apiUser = new ApiUser();
             apiUser.UserName = usersdatas.UserName;
 

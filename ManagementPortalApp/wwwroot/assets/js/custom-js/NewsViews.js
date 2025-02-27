@@ -26,13 +26,19 @@ function GetNews() {
                             `<button class="btn btn-success btn-sm sendeditor-btn" data-id="${news.newsid}">
                                <i class="fa fa-paper-plane"></i>
                              </button>` : '';
+
+                        var goingtolive = (data_[0].AllowUpdate) ?
+                            `<button class="btn btn-success btn-sm sendeditor-btn" data-id="${news.newsid}">
+                               <i class="fa fa-paper-plane"></i>
+                             </button>` : '';
+
                         var remarks = news.editorremarks ?
                             `<textarea class="form-control" rows="3" readonly>${news.editorremarks}</textarea>` :
                             'No remarks provided';
                         if (news.isDeleted == 0 && news.NewsStatus == 0) {
                             var newsItem = `
                                 <tr>
-                                    <td><img src="${news.Newsimage}" class="img-fluid" alt="Image" width="100"></td>
+                                    <td><img src="../images/${news.Newsimage}" class="img-fluid" alt="Image" width="100"></td>
                                     <td>${news.title}</td>             
                                     <td>
                                         <div class="d-flex justify-content-evenly">
@@ -48,7 +54,7 @@ function GetNews() {
                         else if (news.isDeleted == 0 && news.NewsStatus == 1 ) {
                             var newsItem = `
                                 <tr>
-                                    <td><img src="${news.Newsimage}" class="img-fluid" alt="Image" width="100"></td>
+                                    <td><img src="../images/${news.Newsimage}" class="img-fluid" alt="Image" width="100"></td>
                                     <td>${news.title}</td>             
                                     <td>
                                         <div class="d-flex justify-content-evenly">
